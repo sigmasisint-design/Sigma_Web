@@ -73,7 +73,7 @@
         .sidebar.collapsed { width: 40px; }
         
         /* ---------------------------------------------------- */
-        /* ESTILOS PARA O NOME DO USUÁRIO NO SIDEBAR (NOVO) */
+        /* ESTILOS PARA O NOME DO USUÁRIO NO SIDEBAR */
         .user-profile {
             padding: 10px 10px 8px 10px; 
             color: rgba(255, 255, 255, 0.85);
@@ -108,7 +108,7 @@
         .sidebar a {
             color: #fff;
             text-decoration: none;
-            padding: 8px 10px; /* Ajuste para o padding de itens de menu */
+            padding: 8px 10px; 
             display: flex;
             align-items: center;
             transition: background 0.2s;
@@ -139,7 +139,7 @@
         /* Submenu Container (Mesma cor do menu principal) */
         .submenu { 
             background-color: #1565C0; /* Cor do Menu Principal */
-            padding-bottom: 5px; /* Pequeno ajuste visual */
+            padding-bottom: 5px; 
         }
         
         .submenu a { 
@@ -151,7 +151,7 @@
         
         /* HOVER para links de Submenu */
         .submenu a:hover {
-            background-color: #1255a5; /* Cor de hover dos itens principais */
+            background-color: #1255a5; 
         }
 
         /* AJUSTE DO BOTÃO SAIR */
@@ -163,11 +163,11 @@
             background-color: #e9ecef; 
             display: flex; 
             align-items: center; 
-            padding: 10px 15px; /* Altura ajustada dinamicamente pelo padding */
+            padding: 10px 15px; 
             font-weight: bold; 
             border-bottom: 1px solid #dee2e6;
             color: #1565C0; 
-            font-size: 1.1rem; /* Fonte maior para o título/página */
+            font-size: 1.1rem; 
         }
         .content { 
             flex: 1; 
@@ -186,7 +186,6 @@
             justify-content: space-between; 
             padding: 0 15px; 
             font-size: 0.85rem; 
-            /* Rodapé: Cor do texto cinza claro */
             color: #6c757d; 
             border-top: 1px solid #dee2e6;
         }
@@ -195,7 +194,7 @@
         .login-card #linkEsqueciSenha:hover { text-decoration: underline; }
         .login-card #login-feedback { color: #dc3545 !important; }
         
-        /* Estilos do CRUD (NOVO) */
+        /* Estilos do CRUD */
         .table-responsive {
             max-height: 40vh;
             overflow-y: auto;
@@ -234,9 +233,9 @@
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        let perfilUsuario = null; // Armazena os dados do perfil logado
-        let sessaoIDAtual = null; // Armazena o ID da sessão do Supabase ou a sessão customizada
-        let currentEditingUser = null; // ID do usuário sendo editado no CRUD
+        let perfilUsuario = null; 
+        let sessaoIDAtual = null; 
+        let currentEditingUser = null; 
 
         const mainContainer = document.getElementById("main-container");
         const screenBlocker = document.getElementById('screen-blocker');
@@ -396,7 +395,7 @@
             }
             
             if (pageName === 'Usuários') {
-                pageUrl = 'crud-usuarios.html'; // Arquivo HTML a ser criado
+                pageUrl = 'crud-usuarios.html'; 
                 content.innerHTML = `<p class="text-secondary">Carregando módulo de Usuários...</p>`;
             } else if (pageName === 'Dashboard') {
                  content.innerHTML = `<h3>Dashboard</h3><div class="alert alert-info">Bem-vindo(a), **${perfilUsuario.nome_usu}**! Clique nos links do menu lateral para navegar!</div>`;
@@ -490,7 +489,7 @@
         }
 
         // =======================================================
-        // LÓGICA DE CRUD DE USUÁRIOS (MANTIDO)
+        // LÓGICA DE CRUD DE USUÁRIOS 
         // =======================================================
         
         async function loadUsersTable() {
@@ -499,8 +498,6 @@
             
             tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Carregando usuários...</td></tr>';
             
-            // Requisita apenas as colunas necessárias para a tabela.
-            // Nota: O email não é diretamente acessível da tabela 'perfis' por RLS
             const { data: users, error } = await supabaseClient
                 .from(TABLE_NAME)
                 .select('id, nome_usu, nivel_usu, matricula_usu, cpf_usu') 
@@ -520,7 +517,7 @@
             let html = '';
             users.forEach(user => {
                 const isCurrentUser = perfilUsuario && user.id === perfilUsuario.id;
-                const emailDisplay = "---"; // O email está na tabela auth.users, não em perfis (por default)
+                const emailDisplay = "---"; 
 
                 html += `
                     <tr>
@@ -553,7 +550,7 @@
             
             const { data: user, error } = await supabaseClient
                 .from(TABLE_NAME)
-                .select(`*, auth:auth.users(email)`) // Tenta buscar o email via Foreign Table (se configurado)
+                .select(`*, auth:auth.users(email)`) 
                 .eq('id', userId)
                 .single();
 
@@ -906,21 +903,18 @@
             
             blockScreen();
 
-            // 1. Busca o perfil para obter o ID (necessário para a RLS de UPDATE)
+            // 1. Busca o perfil para obter o ID
             const { data: userData, error: userError } = await supabaseClient.from(TABLE_NAME)
                 .select('id')
-                .eq('auth.users.email', email) // Usa a Foreign Table para buscar o ID pelo email (requer RLS)
+                .eq('auth.users.email', email) 
                 .single();
 
             if (userError || !userData) {
                 unblockScreen();
-                // Por segurança, não informa se o e-mail não existe no banco
+                // Apenas informa que o e-mail foi enviado (boa prática de segurança)
                 feedback.textContent = "Se o e-mail estiver cadastrado, as instruções serão enviadas.";
                 feedback.style.display = 'block';
-                // Continua para o passo 3, mas sem fazer o update, para não dar dica de segurança.
-                // NOTE: Se você precisa garantir o update, configure a RLS para permitir a busca acima.
                 
-                // Se falhar a busca, pelo menos enviamos o e-mail de reset para não travar o usuário.
                 const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(email, { 
                     redirectTo: window.location.origin + window.location.pathname 
                 });
@@ -952,7 +946,7 @@
 
             // 3. Chama o fluxo de redefinição de senha do Supabase.
             const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(email, { 
-                redirectTo: window.location.origin + window.location.pathname 
+                redirectTo: window.location.origin + window.location.pathname // Redireciona para esta página após o clique no link
             });
             
             unblockScreen();
@@ -961,7 +955,7 @@
                 Swal.fire('Erro ao solicitar reset', resetError.message, 'error'); 
             } else { 
                 Swal.fire('Sucesso!', 
-                    'Instruções de redefinição de senha foram enviadas para o seu e-mail. Após redefinir, o sistema o forçará a um primeiro acesso na próxima tela de login.', 
+                    'Instruções de redefinição de senha foram enviadas para o seu e-mail. **Clique no link** e você será redirecionado para definir sua nova senha na aplicação.', 
                     'success'); 
             }
         }
@@ -976,6 +970,9 @@
             document.getElementById('linkEsqueciSenha').style.display='none';
             document.getElementById('login-feedback').textContent = `Primeiro acesso detectado! Defina uma nova senha forte.`;
             document.getElementById('login-feedback').style.display = 'block';
+            
+            // Garante que o botão chama a função padrão de salvar senha (que atualiza o perfil)
+            document.getElementById('btnSalvarSenha').onclick = salvarNovaSenha;
         }
         
         function validarForcaSenha(senha){
@@ -1000,6 +997,7 @@
             const { error: authError } = await supabaseClient.auth.updateUser({ password: novaSenha });
             if (authError) { unblockScreen(); Swal.fire('Erro','Falha ao atualizar senha no Auth: ' + authError.message,'error'); return; }
 
+            // Se a atualização da senha for bem-sucedida, marca o perfil como não sendo mais o primeiro acesso
             const { error: perfilError } = await supabaseClient.from(TABLE_NAME).update({ primeiro_acesso: false }).eq('id', perfilUsuario.id);
             unblockScreen();
             
@@ -1009,20 +1007,92 @@
                 Swal.fire('Sucesso','Senha atualizada! Faça login com a nova senha.','success').then(() => { handleLogout(); }); 
             }
         }
+        
+        // =======================================================
+        // FUNÇÃO ADICIONAL: Salvar Senha após Clique no Link de Reset (CORREÇÃO)
+        // =======================================================
+        async function handleResetByToken() {
+            const novaSenha = document.getElementById('novaSenha').value;
+            const confSenha = document.getElementById('confSenha').value;
+
+            if(!novaSenha || novaSenha!==confSenha){ Swal.fire('Erro','As senhas não conferem','error'); return; }
+            const msgErro = validarForcaSenha(novaSenha);
+            if(msgErro){ Swal.fire('Erro', msgErro, 'error'); return; }
+
+            blockScreen();
+
+            // Usa o token de sessão (que o Supabase já injetou na URL) para atualizar a senha.
+            const { error: authError } = await supabaseClient.auth.updateUser({ password: novaSenha });
+            
+            if (authError) { 
+                unblockScreen(); 
+                Swal.fire('Erro','Falha ao atualizar senha: ' + authError.message,'error'); 
+                return; 
+            }
+            
+            // Tenta obter o perfil para atualizar o status de primeiro acesso após o reset
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            
+            if(user) {
+                 await supabaseClient.from(TABLE_NAME).update({ primeiro_acesso: false }).eq('id', user.id);
+            }
+            
+            // Limpa os parâmetros da URL para evitar re-uso
+            history.replaceState(null, '', window.location.pathname);
+
+            // Redireciona para a tela de login
+            Swal.fire('Sucesso','Senha atualizada! Por favor, faça login com a nova senha.','success').then(() => { 
+                handleLogout(); 
+            });
+        }
 
         // =======================================================
-        // INICIALIZAÇÃO
+        // INICIALIZAÇÃO (CORRIGIDO: Processamento de URL para Reset de Senha)
         // =======================================================
         async function initApp() {
             blockScreen();
+            
+            // O Supabase tenta carregar a sessão automaticamente, inclusive de tokens de recuperação na URL.
             const { data: { session } } = await supabaseClient.auth.getSession();
             
-            if (session) {
-                 await supabaseClient.auth.signOut();
-                 console.info("Sessão ativa detectada e finalizada para focar no fluxo de login.");
+            // Se houver parâmetros de recuperação na URL, o usuário precisa redefinir a senha
+            const params = new URLSearchParams(window.location.search);
+            const isRecovery = params.get('type') === 'recovery';
+
+            if (isRecovery) {
+                // Se for recovery, limpamos a sessão anterior (se houver) e preparamos a tela de reset.
+                if (session) {
+                    await supabaseClient.auth.setSession(session); // Mantém o token
+                }
+                
+                renderLogin();
+                
+                // Configura a interface para redefinição de senha
+                document.getElementById('idUsu').style.display='none'; 
+                document.getElementById('senhaUsu').style.display='none'; 
+                document.getElementById('novaSenhaDiv').style.display='block';
+                document.getElementById('confSenhaDiv').style.display='block';
+                document.getElementById('btnSalvarSenha').style.display='block';
+                document.getElementById('btnLogin').style.display='none';
+                document.getElementById('linkEsqueciSenha').style.display='none';
+                
+                document.getElementById('login-feedback').textContent = `Defina sua nova senha.`;
+                document.getElementById('login-feedback').style.display = 'block';
+
+                // Garante que o botão chama a função de reset por token
+                document.getElementById('btnSalvarSenha').onclick = handleResetByToken;
+                
+            } else if (session) {
+                // Se houver uma sessão, mas não for recuperação, forçamos o logout
+                // (Isso é uma escolha para manter o fluxo de login sempre limpo e forçar o `handleLogin`)
+                await supabaseClient.auth.signOut();
+                renderLogin();
+                
+            } else {
+                // Fluxo de login normal
+                renderLogin();
             }
-            
-            renderLogin();
+
             unblockScreen();
         }
 
