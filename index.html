@@ -99,37 +99,9 @@
             text-align: center;
         }
 
-        /* ---------------------------------------------------- */
-        /* NOVO: ESTILOS ESPECÍFICOS PARA O NOME DO USUÁRIO NO SIDEBAR */
-        .user-profile {
-            padding: 10px 10px 8px 10px; /* Preenchimento interno */
-            color: rgba(255, 255, 255, 0.85);
-            transition: opacity 0.3s;
-            overflow: hidden; 
-            white-space: nowrap; /* Impede quebra de linha normal */
-        }
-
-        .user-profile .user-greeting {
-            font-size: 0.75rem; 
-            margin-bottom: 0px;
-        }
-
-        .user-profile .user-name {
-            font-size: 0.95rem; 
-            font-weight: bold;
-            overflow: hidden; /* Oculta qualquer coisa que transborde */
-            text-overflow: ellipsis; /* Adiciona "..." se o texto for muito longo */
-        }
-        /* ---------------------------------------------------- */
-        
         /* Sidebar recolhida */
         .sidebar.collapsed a { justify-content: center; padding: 8px 0; }
         .sidebar.collapsed a .icon { margin: 0; width: 100%; display: block; text-align: center; }
-
-        /* NOVO: Garante que o bloco não seja visível e tenha largura mínima */
-        .sidebar.collapsed .user-profile {
-            display: none; /* OCULTA COMPLETAMENTE O BLOCO DE PERFIL */
-        }
 
         .sidebar.collapsed a .text,
         .sidebar.collapsed .user-info { display: none; }
@@ -216,7 +188,7 @@
         // CONSTANTES E INICIALIZAÇÃO DO SUPABASE
         // =======================================================
         const SUPABASE_URL = 'https://nxgccbvfcxbukhciknoo.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54Z2NjYnZmY3hidWtoY2lrbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyODkzMDAsImV4cCI6MjA3Mzg2NTMwMH0.8iTGv8HzocnJBXB9xT5VUNbwidceKIIbZDuwhGKnahh';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54Z2NjYnZmY3hidWtoY2lrbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyODkzMDAsImV4cCI6MjA3Mzg2NTMwMH0.8iTGv8HzocnJBXB9xT5VUNbwidceKIIbZDuwhGKnahk';
         const TABLE_NAME = 'perfis';
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -364,7 +336,7 @@
         }
 
         /**
-         * Carrega o conteúdo da página, incluindo a busca de HTML externo.
+         * NOVO: Carrega o conteúdo da página, incluindo a busca de HTML externo.
          */
         async function loadPage(pageName) {
             const content = document.getElementById('page-content');
@@ -418,11 +390,6 @@
                             </a>
                             <hr style="border-top: 1px solid #ffffff33; margin: 5px 0;">
 
-                            <div class="user-profile" id="user-profile-info">
-                                <div class="user-greeting">Bem-vindo(a),</div>
-                                <div class="user-name">${perfil.nome_usu || 'Usuário'}</div> 
-                            </div>
-                            <hr style="border-top: 1px solid #ffffff33; margin: 5px 0;">
                             <a href="#" onclick="loadPage('Dashboard')"><span class="icon">home</span><span class="text">Dashboard</span></a>
 
                             <div class="menu-item">
@@ -571,14 +538,10 @@
             Swal.fire('Modo Edição', `Carregando dados de ${user.nome_usu}. E-mail e Senha não podem ser alterados nesta tela.`, 'info');
         }
 
-        /**
-         * FUNÇÃO DE EXCLUSÃO DE USUÁRIOS
-         * Adaptada para a solução definitiva com Edge Function (assumindo que 'delete-user-auth' foi implantada)
-         */
         async function handleDeleteUser(userId, userName) {
             const result = await Swal.fire({
                 title: `Tem certeza que deseja excluir ${userName}?`,
-                text: "Esta ação é irreversível e removerá o perfil e o acesso de login.",
+                text: "Esta ação é irreversível.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
@@ -590,42 +553,32 @@
             if (result.isConfirmed) {
                 blockScreen();
                 
-                // 1. EXCLUI O PERFIL (tabela 'perfis')
+                // Tenta excluir o perfil (RLS deve permitir)
                 const { error: perfilError } = await supabaseClient
                     .from(TABLE_NAME)
                     .delete()
                     .eq('id', userId);
                 
-                if (perfilError) {
-                    unblockScreen();
-                    Swal.fire('Erro RLS/Exclusão', `Falha ao excluir o perfil: ${perfilError.message}. Usuário não deletado.`, 'error');
-                    return;
-                }
+                // Tenta excluir o usuário do Auth (isso falhará no front-end com Anon Key,
+                // mas é mantido para indicar a necessidade de uma Edge Function)
+                const { error: authError } = await supabaseClient.auth.admin.deleteUser(userId);
 
-                // 2. CHAMA A EDGE FUNCTION PARA EXCLUIR O REGISTRO DE LOGIN (Auth)
-                const functionUrl = `${SUPABASE_URL}/functions/v1/delete-user-auth`;
-                
-                const response = await fetch(functionUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: userId })
-                });
-
-                const data = await response.json();
                 unblockScreen();
 
-                if (!response.ok) {
-                    Swal.fire('Aviso Crítico', 
-                              `O perfil foi excluído, mas houve um erro ao deletar o registro de login (Auth): ${data.error}. Verifique o Supabase.`, 
-                              'warning');
+                if (perfilError) {
+                    Swal.fire('Erro RLS/Exclusão', `Falha ao excluir o perfil: ${perfilError.message}.`, 'error');
+                } else if (authError && authError.message.includes('not allowed')) {
+                    Swal.fire('Aviso', `Perfil excluído com sucesso. Mas a exclusão do usuário do Auth falhou (Permissão negada).`, 'warning');
+                    loadUsersTable();
+                } else if (authError) {
+                     Swal.fire('Erro Auth', `Perfil excluído. Falha ao excluir do Auth: ${authError.message}`, 'error');
+                     loadUsersTable();
                 } else {
-                    Swal.fire('Excluído!', `O usuário ${userName} foi removido COMPLETA e PERMANENTEMENTE do sistema.`, 'success');
+                    Swal.fire('Excluído!', `O usuário ${userName} foi removido com sucesso.`, 'success');
+                    loadUsersTable();
                 }
-                
-                loadUsersTable();
             }
         }
-
 
         async function handleCadastroUsuario() {
             const userId = document.getElementById('cadUserId').value;
