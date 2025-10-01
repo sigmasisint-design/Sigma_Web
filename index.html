@@ -11,22 +11,211 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
     <style>
-        /* CSS Omitido para Brevidade, mas Completo na Sua Versão */
+        /* ==================== CSS BÁSICO E LOGIN ==================== */
         html, body {
-            height: 100%; margin: 0; padding: 0; font-family: Arial, sans-serif;
-            font-size: 0.95rem; color: #1565C0; background: #f5f6fa;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            font-size: 0.95rem;
+            color: #1565C0; 
+            background: #f5f6fa;
         }
-        .login-container { display: flex; justify-content: center; align-items: center; height: 100vh; }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
         .login-card {
-            background: #fff; padding: 30px; border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
         }
+
         .login-card h4 { text-align: center; margin: 0; line-height: 1; color: #1565C0; font-size: 2.2rem; }
         .login-card .subtitulo { font-size: 0.85rem; text-align: center; color: #1565C0; margin: 0; line-height: 1; }
+        
         .login-card .form-label { margin-bottom: 2px; color: #1565C0; }
+        .login-card .form-control { border-radius: 5px; color: #333; }
+        .login-card .form-control::placeholder { color: rgba(0, 0, 0, 0.6); opacity: 1; }
         .login-card .btn-primary, .btn-success{background: #1565C0; border-color: #1565C0;}
-        #screen-blocker { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.5); z-index: 9999; cursor: progress; }
+        .login-card .btn-primary:hover, .btn-success:hover { background: #1255a5; border-color: #1255a5;}
+        
+        /* CSS para o overlay de bloqueio */
+        #screen-blocker {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0.5);
+            z-index: 9999;
+            cursor: progress;
+        }
+        
+        /* ==================== CSS PARA O DASHBOARD ==================== */
+        .main-wrapper { display: flex; height: 100vh; overflow: hidden; }
+        .sidebar {
+            width: 220px;
+            background-color: #1565C0; 
+            color: #fff; 
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .sidebar.collapsed { width: 40px; }
+        
+        /* ---------------------------------------------------- */
+        /* ESTILOS PARA O NOME DO USUÁRIO NO SIDEBAR (NOVO) */
+        .user-profile {
+            padding: 10px 10px 8px 10px; 
+            color: rgba(255, 255, 255, 0.85);
+            transition: opacity 0.3s;
+            overflow: hidden; 
+            white-space: nowrap; 
+        }
+
+        .user-profile .user-greeting {
+            font-size: 0.75rem; 
+            margin-bottom: 0px;
+        }
+
+        .user-profile .user-name {
+            font-size: 0.95rem; 
+            font-weight: bold;
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+
+        .sidebar.collapsed .user-profile {
+            display: none; 
+        }
+        /* ---------------------------------------------------- */
+
+        .logout-area { margin-top: auto; }
+        .sidebar .menu-items { display: flex; flex-direction: column; margin-top: 0; }
+        
+        .sidebar hr { border-top: 1px solid #ffffff33; margin: 5px 0; }
+        
+        /* ESTILOS DE LINK GERAL */
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 10px; /* Ajuste para o padding de itens de menu */
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        
+        /* HOVER: Cor mais escura que a principal */
+        .sidebar a:hover { background-color: #1255a5; }
+        
+        .sidebar .icon {
+            font-family: 'Material Symbols Outlined';
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+            margin-left: 5px;
+            margin-right: 10px; 
+            display: inline-block;
+            text-align: center;
+        }
+
+        /* Sidebar recolhida */
+        .sidebar.collapsed a { justify-content: center; padding: 8px 0; }
+        .sidebar.collapsed a .icon { margin: 0; width: 100%; display: block; text-align: center; }
+
+        .sidebar.collapsed a .text,
+        .sidebar.collapsed .user-info { display: none; }
+        .sidebar.collapsed a .expand-icon { display: none; }
+
+        /* Submenu Container (AJUSTADO: Mesma cor do menu principal) */
+        .submenu { 
+            background-color: #1565C0; /* Cor do Menu Principal */
+            padding-bottom: 5px; /* Pequeno ajuste visual */
+        }
+        
+        .submenu a { 
+            padding-left: 35px; 
+            font-size: 0.9rem; 
+            padding-top: 6px; 
+            padding-bottom: 6px; 
+        }
+        
+        /* HOVER para links de Submenu */
+        .submenu a:hover {
+            background-color: #1255a5; /* Cor de hover dos itens principais */
+        }
+
+        /* AJUSTE DO BOTÃO SAIR */
+        .logout-area a { padding: 5px 10px; background-color: #dc3545 !important; }
+        .sidebar.collapsed .logout-area a { padding: 5px 0; }
+
+        .content-wrapper { flex: 1; display: flex; flex-direction: column; }
+        .topbar { 
+            background-color: #e9ecef; 
+            display: flex; 
+            align-items: center; 
+            padding: 10px 15px; /* Altura ajustada dinamicamente pelo padding */
+            font-weight: bold; 
+            border-bottom: 1px solid #dee2e6;
+            color: #1565C0; 
+            font-size: 1.1rem; /* Fonte maior para o título/página */
+        }
+        .content { 
+            flex: 1; 
+            padding: 20px; 
+            background: #f5f6fa; 
+            overflow-y: auto; 
+            color: #333; 
+        }
+        .content h3 { color: #1565C0; }
+
+        .footer { 
+            height: 40px; 
+            background-color: #e9ecef; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 15px; 
+            font-size: 0.85rem; 
+            /* Rodapé: Cor do texto cinza claro */
+            color: #6c757d; 
+            border-top: 1px solid #dee2e6;
+        }
+        
         .login-card #linkEsqueciSenha { color: #1565C0; text-decoration: none; }
+        .login-card #linkEsqueciSenha:hover { text-decoration: underline; }
+        .login-card #login-feedback { color: #dc3545 !important; }
+        
+        /* Estilos do CRUD (NOVO) */
+        .table-responsive {
+            max-height: 40vh;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: .25rem;
+        }
+        .table-crud th, .table-crud td {
+            font-size: 0.85rem;
+            vertical-align: middle;
+            white-space: nowrap; 
+            color: #333; 
+        }
+        .table-crud .btn-sm {
+            padding: 2px 5px;
+            font-size: 0.75rem;
+        }
+        .btn-acao {
+            padding: 4px 6px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -45,7 +234,9 @@
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        let perfilUsuario = null; 
+        let perfilUsuario = null; // Armazena os dados do perfil logado
+        let sessaoIDAtual = null; // Armazena o ID da sessão do Supabase ou a sessão customizada
+        let currentEditingUser = null; // ID do usuário sendo editado no CRUD
 
         const mainContainer = document.getElementById("main-container");
         const screenBlocker = document.getElementById('screen-blocker');
@@ -57,17 +248,74 @@
         function unblockScreen() { screenBlocker.style.display='none'; }
         
         function generateUUID() {
+            // Gerador de UUID simplificado para ID de sessão
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
         }
         
-        function validarForcaSenha(senha){
-            if(senha.length < 8) return "A senha deve ter no mínimo 8 caracteres";
-            if(!/[A-Z]/.test(senha)) return "A senha deve conter pelo menos uma letra maiúscula";
-            if(!/[!@#$%^&*(),.?":{}|<>]/.test(senha)) return "A senha deve conter pelo menos um caractere especial";
-            return null;
+        /**
+         * Reseta ou prepara o formulário de cadastro/edição de usuário.
+         */
+        function resetForm(clearOnly = false) {
+            const form = document.getElementById('formCadastroUsuario');
+            if (!form) return;
+            
+            form.reset();
+            currentEditingUser = null;
+            document.getElementById('cadUserId').value = "";
+            document.getElementById('form-title').textContent = "Novo Usuário";
+            document.getElementById('cadastro-feedback').style.display = 'none';
+
+            // Campo de Senha
+            const senhaField = document.getElementById('senha-field');
+            if (senhaField) senhaField.style.display = 'block';
+            document.getElementById('cadSenha').required = true;
+            document.getElementById('cadSenha').placeholder = "Mínimo 8 caracteres";
+            
+            // Campo de E-mail
+            document.getElementById('cadEmail').disabled = false;
+            document.getElementById('cadEmail').placeholder = "Será usado para login";
+            document.getElementById('cadEmail').required = true;
+            
+            // Botões
+            document.getElementById('btnSalvarUsuario').innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px; margin-right: 5px; vertical-align: middle;">person_add</span> Cadastrar Usuário';
+            document.getElementById('btnLimparForm').style.display = 'none';
+            
+            if (clearOnly) {
+                Swal.fire('Novo Cadastro', 'Formulário pronto para um novo usuário.', 'info');
+            }
+        }
+        
+        /**
+         * Inicializa os listeners de eventos após o conteúdo do CRUD ser carregado via fetch.
+         */
+        function initializeCrudListeners() {
+            const formCadastro = document.getElementById('formCadastroUsuario');
+            if (formCadastro) {
+                formCadastro.removeEventListener('submit', handleCadastroUsuario); 
+                formCadastro.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleCadastroUsuario();
+                });
+            }
+            
+            const cadCpfInput = document.getElementById('cadCPF');
+            if (cadCpfInput) {
+                cadCpfInput.addEventListener('input', function(e) {
+                    // Remove qualquer caractere que não seja número
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                });
+            }
+            
+            // Adiciona o listener ao botão de limpar formulário
+            const btnLimpar = document.getElementById('btnLimparForm');
+            if (btnLimpar) {
+                btnLimpar.addEventListener('click', function() {
+                    resetForm(true);
+                });
+            }
         }
 
         // =======================================================
@@ -75,37 +323,37 @@
         // =======================================================
         
         function renderLogin() {
-            // 1. Renderiza o HTML COMPLETO da tela de login
+            // MANTIDO: Renderiza o formulário de login
             mainContainer.innerHTML = `
                 <div class="login-container" id="login-container">
                     <div class="login-card">
                         <h4>SIGMA</h4>
                         <div class="subtitulo">Gestão Inteligente</div>
                         
-                        <div class="mb-3 mt-3" id="emailDiv">
+                        <div class="mb-3 mt-3">
                             <label for="idUsu" class="form-label">E-mail:</label>
                             <input type="email" id="idUsu" class="form-control" placeholder="Digite seu E-mail" required>
                         </div>
 
-                        <div class="mb-3" id="senhaDiv">
+                        <div class="mb-3">
                             <label for="senhaUsu" class="form-label">Senha:</label>
                             <input type="password" id="senhaUsu" class="form-control" placeholder="Digite sua senha" required>
                         </div>
 
-                        <div class="mb-3" id="novaSenhaDiv">
+                        <div class="mb-3" id="novaSenhaDiv" style="display:none;">
                             <label for="novaSenha" class="form-label">Nova Senha:</label>
                             <input type="password" id="novaSenha" class="form-control" placeholder="Digite a nova senha">
                         </div>
 
-                        <div class="mb-3" id="confSenhaDiv">
+                        <div class="mb-3" id="confSenhaDiv" style="display:none;">
                             <label for="confSenha" class="form-label">Confirme a Senha:</label>
                             <input type="password" id="confSenha" class="form-control" placeholder="Confirme a nova senha">
                         </div>
 
                         <button class="btn btn-primary w-100" id="btnLogin" onclick="handleLogin()">Entrar</button>
-                        <button class="btn btn-success w-100" id="btnSalvarSenha">Salvar Senha</button>
+                        <button class="btn btn-success w-100" id="btnSalvarSenha" style="display:none;" onclick="salvarNovaSenha()">Salvar Senha</button>
 
-                        <p id="login-feedback" class="text-danger text-center mt-2"></p>
+                        <p id="login-feedback" class="text-danger text-center mt-2" style="display:none;"></p>
 
                         <div class="text-center mt-2">
                             <a href="javascript:void(0);" id="linkEsqueciSenha" onclick="handlePasswordReset()">Esqueci minha senha</a>
@@ -113,167 +361,609 @@
                     </div>
                 </div>
             `;
-            
-            // 2. Garante o estado inicial (LOGIN PADRÃO)
-            // ESTA É A PARTE CRÍTICA E CORRIGIDA: Forçar os elementos a se esconderem APÓS a renderização do HTML.
-            document.getElementById('novaSenhaDiv').style.display = 'none';
-            document.getElementById('confSenhaDiv').style.display = 'none';
-            document.getElementById('btnSalvarSenha').style.display = 'none';
-            document.getElementById('login-feedback').style.display = 'none';
-            
-            document.getElementById('emailDiv').style.display = 'block';
-            document.getElementById('senhaDiv').style.display = 'block';
-            document.getElementById('btnLogin').style.display = 'block';
-            document.getElementById('linkEsqueciSenha').style.display = 'block';
+        }
+        
+        function toggleSidebar(){ 
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            if (sidebar.classList.contains('collapsed')) {
+                document.querySelectorAll('.submenu').forEach(sm => sm.style.display = "none");
+            }
+        }
 
-            // Configuração do botão de salvar senha (para primeiro acesso)
-            const btnSalvar = document.getElementById('btnSalvarSenha');
-            if (btnSalvar) {
-                 btnSalvar.onclick = salvarNovaSenha; 
+        function handleMenuClick(submenuId) {
+            const sidebar = document.getElementById('sidebar');
+            const submenu = document.getElementById(submenuId);
+
+            if (sidebar.classList.contains('collapsed')) {
+                sidebar.classList.remove('collapsed');
+                submenu.style.display = "block";
+            } else {
+                submenu.style.display = (submenu.style.display === "none") ? "block" : "none";
+            }
+        }
+
+        /**
+         * Carrega o conteúdo da página, incluindo a busca de HTML externo.
+         */
+        async function loadPage(pageName) {
+            const content = document.getElementById('page-content');
+            const topbarTitle = document.getElementById('topbar-title');
+            let pageUrl = '';
+
+            if (topbarTitle) {
+                topbarTitle.innerHTML = `${pageName}`;
+            }
+            
+            if (pageName === 'Usuários') {
+                pageUrl = 'crud-usuarios.html'; // Arquivo HTML a ser criado
+                content.innerHTML = `<p class="text-secondary">Carregando módulo de Usuários...</p>`;
+            } else if (pageName === 'Dashboard') {
+                 content.innerHTML = `<h3>Dashboard</h3><div class="alert alert-info">Bem-vindo(a), **${perfilUsuario.nome_usu}**! Clique nos links do menu lateral para navegar!</div>`;
+                return;
+            } else {
+                content.innerHTML = `<h3>${pageName}</h3><div class="alert alert-warning">Este módulo está em desenvolvimento.</div>`;
+                return;
+            }
+            
+            blockScreen();
+
+            try {
+                const response = await fetch(pageUrl);
+                if (!response.ok) throw new Error('Não foi possível carregar o conteúdo da página.');
+                
+                content.innerHTML = await response.text();
+                
+                if (pageName === 'Usuários') {
+                    // Inicializa a lógica específica do CRUD após o carregamento do HTML
+                    initializeCrudListeners();
+                    resetForm(); 
+                    loadUsersTable();
+                }
+
+            } catch (error) {
+                content.innerHTML = `<h3 class="text-danger">Erro ao Carregar</h3><p class="text-danger">Falha ao carregar o módulo de ${pageName}. Verifique se o arquivo ${pageUrl} existe.</p>`;
+                console.error("Fetch Error:", error);
+            } finally {
+                unblockScreen();
             }
         }
         
-        // [Funções de Dashboard Omitidas para Brevidade]
-        function renderMainPage(perfil) { /* ... */ }
+        function renderMainPage(perfil) {
+            const sessaoIdCurto = perfil.sessao_atual ? perfil.sessao_atual.substring(0, 8) : 'N/A';
+            
+            mainContainer.innerHTML = `
+                <div class="main-wrapper" id="main-wrapper">
+                    <div class="sidebar collapsed" id="sidebar">
+                        <div class="menu-items">
+                            <a href="javascript:void(0);" class="toggle-btn" onclick="toggleSidebar()">
+                                <span class="icon">menu</span>
+                                <span class="text">SIGMA</span>
+                            </a>
+                            <hr>
+
+                            <div class="user-profile" id="user-profile-info">
+                                <div class="user-greeting">Bem-vindo(a),</div>
+                                <div class="user-name">${perfil.nome_usu || 'Usuário'}</div> 
+                            </div>
+                            <hr>
+
+                            <a href="#" onclick="loadPage('Dashboard')"><span class="icon">home</span><span class="text">Dashboard</span></a>
+
+                            <div class="menu-item">
+                                <a href="#" onclick="handleMenuClick('cadastrosSub')">
+                                    <span class="icon">engineering</span>
+                                    <span class="text">Cadastros</span> 
+                                    <span class="icon expand-icon" style="margin-left:auto;">expand_more</span>
+                                </a>
+                                <div class="submenu" id="cadastrosSub" style="display:none;">
+                                    <a href="#" onclick="loadPage('Obras')"><span class="icon">format_list_bulleted</span><span class="text">Obras</span></a>
+                                    
+                                    <a href="#" onclick="loadPage('Usuários')"><span class="icon">person</span><span class="text">Usuários</span></a>
+                                    
+                                    <a href="#" onclick="loadPage('Departamentos')"><span class="icon">groups</span><span class="text">Departamentos</span></a>
+                                </div>
+                            </div>
+                            
+                            <a href="#" onclick="loadPage('Relatórios')"><span class="icon">bar_chart</span><span class="text">Relatórios</span></a>
+                        </div>
+
+                        <div class="logout-area">
+                            <a href="#" onclick="handleLogout()">
+                                <span class="icon">logout</span><span class="text">Sair</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="content-wrapper">
+                        <div class="topbar" id="topbar-title">Menu Principal</div> 
+                        <div class="content" id="page-content">
+                            </div>
+                        <div class="footer">
+                            <span>SIGMA - Sistema Inteligente de Gestão &copy; 2025</span>
+                            <span id="nivel-usuario">Perfil: ${perfil.nivel_usu || 'Padrão'} | Sessão ID: ${sessaoIdCurto}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            loadPage('Dashboard'); 
+        }
 
         // =======================================================
-        // FUNÇÕES DE AUTENTICAÇÃO (Essenciais)
+        // LÓGICA DE CRUD DE USUÁRIOS (MANTIDO)
+        // =======================================================
+        
+        async function loadUsersTable() {
+            const tableBody = document.getElementById('users-table-body');
+            if (!tableBody) return; 
+            
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Carregando usuários...</td></tr>';
+            
+            // Requisita apenas as colunas necessárias para a tabela.
+            // Nota: O email não é diretamente acessível da tabela 'perfis' por RLS
+            const { data: users, error } = await supabaseClient
+                .from(TABLE_NAME)
+                .select('id, nome_usu, nivel_usu, matricula_usu, cpf_usu') 
+                .order('nome_usu', { ascending: true });
+
+            if (error) {
+                console.error('Erro ao carregar usuários:', error);
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Falha ao carregar usuários. Verifique as permissões (RLS) da tabela perfis.</td></tr>';
+                return;
+            }
+            
+            if (!users || users.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Nenhum usuário cadastrado.</td></tr>';
+                return;
+            }
+
+            let html = '';
+            users.forEach(user => {
+                const isCurrentUser = perfilUsuario && user.id === perfilUsuario.id;
+                const emailDisplay = "---"; // O email está na tabela auth.users, não em perfis (por default)
+
+                html += `
+                    <tr>
+                        <td>${user.nome_usu}</td>
+                        <td>${user.nivel_usu}</td>
+                        <td>${user.matricula_usu}</td>
+                        <td>${emailDisplay}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info btn-acao me-1" onclick="handleEditUser('${user.id}')" title="Editar">
+                                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">edit</span>
+                            </button>
+                            ${isCurrentUser 
+                                ? `<button class="btn btn-sm btn-danger btn-acao" disabled title="Você não pode excluir a si mesmo">
+                                    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">delete</span>
+                                </button>` 
+                                : `<button class="btn btn-sm btn-danger btn-acao" onclick="handleDeleteUser('${user.id}', '${user.nome_usu}')" title="Excluir">
+                                    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">delete</span>
+                                </button>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+            tableBody.innerHTML = html;
+        }
+
+        async function handleEditUser(userId) {
+            blockScreen();
+            resetForm(); 
+            
+            const { data: user, error } = await supabaseClient
+                .from(TABLE_NAME)
+                .select(`*, auth:auth.users(email)`) // Tenta buscar o email via Foreign Table (se configurado)
+                .eq('id', userId)
+                .single();
+
+            unblockScreen();
+            
+            if (error || !user) {
+                Swal.fire('Erro', 'Não foi possível carregar os dados do usuário para edição.', 'error');
+                return;
+            }
+            
+            currentEditingUser = userId;
+            document.getElementById('cadUserId').value = userId;
+            document.getElementById('form-title').textContent = `Editar Usuário: ${user.nome_usu}`;
+            
+            document.getElementById('cadNome').value = user.nome_usu;
+            document.getElementById('cadNivel').value = user.nivel_usu;
+            document.getElementById('cadEmpresa').value = user.empresa_usu;
+            document.getElementById('cadMatricula').value = user.matricula_usu;
+            document.getElementById('cadCPF').value = user.cpf_usu;
+            
+            const userEmail = user.auth ? user.auth.email : "E-mail indisponível";
+            
+            document.getElementById('cadEmail').value = userEmail;
+            document.getElementById('cadEmail').disabled = true; 
+            document.getElementById('cadEmail').required = false; 
+            
+            // Oculta o campo de senha na edição
+            const senhaField = document.getElementById('senha-field');
+            if (senhaField) senhaField.style.display = 'none';
+            document.getElementById('cadSenha').required = false;
+
+            document.getElementById('btnSalvarUsuario').innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px; margin-right: 5px; vertical-align: middle;">update</span> Salvar Alterações';
+            document.getElementById('btnLimparForm').style.display = 'inline-block';
+
+            Swal.fire('Modo Edição', `Carregando dados de ${user.nome_usu}. E-mail e Senha não podem ser alterados nesta tela.`, 'info');
+        }
+
+        async function handleDeleteUser(userId, userName) {
+            const result = await Swal.fire({
+                title: `Tem certeza que deseja excluir ${userName}?`,
+                text: "Esta ação é irreversível e removerá o perfil e o acesso de login.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sim, Excluir!',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
+                blockScreen();
+                
+                // Tenta excluir a conta de autenticação (isso geralmente falha sem Edge Functions/Admin Key)
+                const { error: authError } = await supabaseClient.auth.admin.deleteUser(userId);
+                
+                // 1. EXCLUI O PERFIL (tabela 'perfis')
+                const { error: perfilError } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .delete()
+                    .eq('id', userId);
+                
+                unblockScreen();
+                
+                if (perfilError) {
+                    Swal.fire('Erro RLS/Exclusão', `Falha ao excluir o perfil: ${perfilError.message}.`, 'error');
+                    return;
+                }
+
+                if (authError && authError.message.includes('not allowed')) {
+                    Swal.fire('Aviso de Segurança', `Perfil excluído. Mas a conta de Auth não pôde ser excluída (permissão negada).`, 'warning');
+                } else if (authError) {
+                    Swal.fire('Aviso', `Perfil excluído. Erro no Auth: ${authError.message}`, 'warning');
+                } else {
+                    Swal.fire('Excluído!', `O usuário ${userName} foi removido PERMANENTEMENTE.`, 'success');
+                }
+                
+                loadUsersTable();
+            }
+        }
+
+
+        async function handleCadastroUsuario() {
+            const userId = document.getElementById('cadUserId').value;
+            const isEditing = !!userId;
+            
+            const matricula = document.getElementById('cadMatricula').value.trim();
+            const empresa = document.getElementById('cadEmpresa').value.trim();
+            const cpf = document.getElementById('cadCPF').value.trim(); 
+            const nome = document.getElementById('cadNome').value.trim();
+            const nivel = document.getElementById('cadNivel').value;
+            const email = isEditing ? null : document.getElementById('cadEmail').value.trim(); 
+            const senha = isEditing ? null : document.getElementById('cadSenha').value; 
+            
+            const feedback = document.getElementById('cadastro-feedback');
+            const nomeUsuarioLogado = perfilUsuario ? perfilUsuario.nome_usu : 'SYSTEM'; 
+            const dataHoraAtual = new Date().toISOString(); 
+
+            feedback.style.display = 'none';
+
+            // Validações
+            if (!nome || !nivel || !matricula || !empresa || cpf.length !== 11) {
+                feedback.textContent = "Preencha Nome, Nível, Matrícula, Empresa, e CPF (11 dígitos).";
+                feedback.style.display = 'block';
+                return;
+            }
+            if (!isEditing && (!email || !senha || senha.length < 8)) {
+                 feedback.textContent = "Para novo cadastro, E-mail é obrigatório e Senha deve ter no mínimo 8 caracteres.";
+                 feedback.style.display = 'block';
+                 return;
+            }
+
+            blockScreen();
+
+            if (isEditing) {
+                // --- LÓGICA DE EDIÇÃO (UPDATE) ---
+                const { error: perfilError } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .update({
+                        matricula_usu: matricula, empresa_usu: empresa, cpf_usu: cpf,
+                        nome_usu: nome, nivel_usu: nivel,
+                        data_alt: dataHoraAtual, usu_alt: nomeUsuarioLogado,
+                    })
+                    .eq('id', userId);
+
+                unblockScreen();
+                if (perfilError) {
+                    Swal.fire('Erro na Edição', `Falha ao atualizar o perfil: ${perfilError.message}.`, 'error');
+                    return;
+                }
+                Swal.fire('Sucesso!', `O usuário **${nome}** foi atualizado.`, 'success');
+                resetForm();
+                loadUsersTable();
+                
+            } else {
+                // --- LÓGICA DE NOVO CADASTRO (CREATE) ---
+                
+                // 1. CRIAÇÃO DO USUÁRIO NA TABELA DE AUTENTICAÇÃO (auth.users)
+                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: senha,
+                });
+                
+                if (authError) {
+                    unblockScreen();
+                    const msg = authError.message.includes('already registered') ? 'Este e-mail já está cadastrado.' : authError.message;
+                    Swal.fire('Erro no Cadastro', msg, 'error');
+                    return;
+                }
+
+                const newUserId = authData.user.id;
+                
+                // 2. CRIAÇÃO DO PERFIL NA TABELA 'perfis'
+                const { error: perfilError } = await supabaseClient
+                    .from(TABLE_NAME) 
+                    .insert({
+                        id: newUserId, 
+                        matricula_usu: matricula, empresa_usu: empresa, cpf_usu: cpf,
+                        nome_usu: nome, nivel_usu: nivel,
+                        data_alt: dataHoraAtual, usu_alt: nomeUsuarioLogado,
+                        primeiro_acesso: true, bloqueado: false, cont_erro_login: 0, sessao_atual: null,
+                    });
+
+                unblockScreen();
+                if (perfilError) {
+                    // Tenta remover o Auth user se o perfil falhou
+                    await supabaseClient.auth.admin.deleteUser(newUserId);
+                    Swal.fire({
+                        title: 'Aviso Crítico',
+                        html: `Usuário criado no Auth, mas **falha ao criar o perfil**: ${perfilError.message}. Contate o suporte para limpeza do registro.`,
+                        icon: 'warning'
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Sucesso!',
+                    html: `O usuário **${nome}** foi cadastrado com sucesso e deve definir a senha no primeiro acesso.`,
+                    icon: 'success'
+                });
+                resetForm();
+                loadUsersTable();
+            }
+        }
+        
+        // =======================================================
+        // FUNÇÕES DE AUTENTICAÇÃO (CORRIGIDO: Fallback para UUID Fictício)
         // =======================================================
         
         async function handleLogin() {
             const email = document.getElementById('idUsu').value;
             const password = document.getElementById('senhaUsu').value;
-            if(!email || !password){ Swal.fire("Atenção","Preencha E-mail e Senha","warning"); return; }
-            Swal.fire("Aviso", "Lógica de login real omitida para focar no reset. Assumindo falha/necessidade de Supabase.", "info"); 
-            unblockScreen();
-        }
-
-        async function handleLogout() {
-            perfilUsuario = null;
-            unblockScreen(); 
-            renderLogin();
-        }
-        
-        /**
-         * @FLUXO_SUPABASE: Inicia a solicitação de redefinição.
-         */
-        async function handlePasswordReset() {
-            const email = document.getElementById("idUsu").value.trim();
             const feedback = document.getElementById('login-feedback');
             
+            if(!email || !password){ Swal.fire("Atenção","Preencha E-mail e Senha","warning"); return; }
+            
+            blockScreen();
             feedback.style.display = 'none';
 
-            if (!email) { 
-                feedback.textContent = "Preencha o E-mail para solicitar o link de redefinição de senha.";
-                feedback.style.display = 'block';
+            // 1. Tenta fazer o login no Auth
+            const { data: authData, error: loginError } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
+            
+            if (loginError) { 
+                unblockScreen(); 
+                feedback.textContent = "Credenciais inválidas. Verifique seu e-mail e senha."; 
+                feedback.style.display = 'block'; 
                 return; 
             }
             
-            blockScreen();
-
-            const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(email, { 
-                redirectTo: window.location.origin + window.location.pathname 
-            });
+            const userId = authData.user.id;
+            const accessToken = authData.session.access_token; 
             
-            unblockScreen();
-            
-            if (resetError) { 
-                Swal.fire('Erro ao solicitar reset', resetError.message, 'error'); 
-            } else { 
-                Swal.fire('Instruções Enviadas!', 
-                    'Se o e-mail estiver cadastrado, as instruções de redefinição foram enviadas. **Clique no link** no e-mail para definir sua nova senha.', 
-                    'success'); 
+            // CORREÇÃO APLICADA: Usa o ID da sessão do Supabase OU gera um UUID fictício (fallback)
+            let userSessionId = authData.session.id;
+            if (!userSessionId) {
+                userSessionId = generateUUID();
+                console.warn("⚠️ Não foi possível obter o ID da sessão do Supabase. Usando UUID Fictício:", userSessionId);
             }
+
+            // Cliente autenticado para garantir permissão RLS
+            const authenticatedClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                global: { headers: { Authorization: `Bearer ${accessToken}` } }
+            });
+
+            // 2. Busca o perfil do usuário
+            const { data: perfil, error: perfilError } = await authenticatedClient
+                .from(TABLE_NAME).select(`id, bloqueado, cont_erro_login, primeiro_acesso, nome_usu, nivel_usu, sessao_atual`).eq('id', userId).single();
+            
+            if (perfilError || !perfil) { 
+                await supabaseClient.auth.signOut(); 
+                unblockScreen(); 
+                Swal.fire("Erro de Sistema", "Perfil de usuário não encontrado. Contate o suporte.", "error"); 
+                return; 
+            }
+            
+            // 3. Verifica bloqueio (mantido)
+            if (perfil.bloqueado) { 
+                await supabaseClient.auth.signOut(); 
+                unblockScreen(); 
+                feedback.textContent = `Acesso bloqueado. Contate o administrador.`; 
+                feedback.style.display = 'block'; 
+                return; 
+            }
+            
+            // 4. Verifica primeiro acesso (mantido)
+            if (perfil.primeiro_acesso) { 
+                unblockScreen(); 
+                // A sessão deve ser configurada antes de mostrar o formulário
+                await supabaseClient.auth.setSession(authData.session);
+                perfilUsuario = perfil;
+                showChangePasswordForm(perfil); 
+                return; 
+            }
+            
+            // 5. Checa concorrência de sessão: usa o sessao_atual do banco vs. o ID da sessão (real ou fictícia)
+            if (perfil.sessao_atual && perfil.sessao_atual !== userSessionId) {
+                unblockScreen();
+                Swal.fire({
+                    title: "⚠️ Aviso de Sessão Ativa",
+                    html: `<p>Detectamos outra sessão ativa (ID: ${perfil.sessao_atual.substring(0, 8)}). Deseja continuar e desconectar a outra sessão?</p>`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sim, Continuar",
+                    cancelButtonText: "Não, Cancelar"
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        blockScreen();
+                        // Atualiza a sessão para a nova (usando o cliente autenticado)
+                        const { error: sessionUpdateError } = await authenticatedClient.from(TABLE_NAME).update({ 
+                            sessao_atual: userSessionId, // <--- REGISTRA O ID DA SESSÃO (real ou fictício)
+                            cont_erro_login: 0
+                        }).eq('id', perfil.id);
+                        
+                        if (sessionUpdateError) {
+                            await supabaseClient.auth.signOut(); 
+                            unblockScreen();
+                            Swal.fire("Erro de Permissão (RLS)", `Falha ao registrar a sessão: ${sessionUpdateError.message}. Verifique a RLS.`, "error");
+                            return;
+                        }
+
+                        // ATUALIZA O CLIENTE GLOBAL
+                        await supabaseClient.auth.setSession(authData.session);
+                        perfilUsuario = perfil;
+                        perfilUsuario.sessao_atual = userSessionId;
+                        unblockScreen();
+                        renderMainPage(perfilUsuario);
+
+                    } else {
+                        // Cancela o login atual
+                        await supabaseClient.auth.signOut(); 
+                        renderLogin();
+                    }
+                });
+                return;
+            }
+            
+            // 6. Login Bem-Sucedido: Atualiza a sessão no perfil 
+            
+            const { error: sessionUpdateError } = await authenticatedClient
+                .from(TABLE_NAME)
+                .update({ 
+                    cont_erro_login: 0, 
+                    sessao_atual: userSessionId // <--- REGISTRA O ID DA SESSÃO (real ou fictício)
+                })
+                .eq('id', perfil.id);
+            
+            if (sessionUpdateError) {
+                await supabaseClient.auth.signOut(); 
+                unblockScreen();
+                Swal.fire("Erro de Permissão (RLS)", `Falha ao registrar a sessão: ${sessionUpdateError.message}. Verifique a RLS.`, "error");
+                return;
+            }
+
+            // ATUALIZA O CLIENTE SUPABASE GLOBAL COM O NOVO TOKEN DO USUÁRIO LOGADO
+            await supabaseClient.auth.setSession(authData.session);
+
+            perfilUsuario = perfil;
+            perfilUsuario.sessao_atual = userSessionId;
+
+            // 7. Renderiza o Dashboard
+            unblockScreen();
+            renderMainPage(perfilUsuario);
+        }
+
+        async function handleLogout() {
+            blockScreen(); 
+            // Limpa a sessão no banco para impedir concorrência
+            if (perfilUsuario) {
+                // Tenta usar o cliente autenticado para limpar a própria sessão.
+                await supabaseClient.from(TABLE_NAME).update({ sessao_atual: null }).eq('id', perfilUsuario.id);
+            }
+            await supabaseClient.auth.signOut();
+            sessaoIDAtual = null; 
+            perfilUsuario = null;
+
+            unblockScreen(); 
+            Swal.fire({ title: "Logout", text: "Sessão encerrada com sucesso.", icon: "info", allowOutsideClick: false, confirmButtonText: "OK" }).then(() => { renderLogin(); });
         }
         
+        async function handlePasswordReset() {
+            // ... Lógica de Reset de Senha (Mantida)
+            const email = document.getElementById("idUsu").value.trim();
+            if (!email) { Swal.fire("Atenção", "Preencha o E-mail para solicitar a nova senha", "warning"); return; }
+            blockScreen();
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+            unblockScreen();
+            if (error) { Swal.fire('Erro ao solicitar reset', error.message, 'error'); } else { Swal.fire('Sucesso', 'Instruções para reset de senha enviadas para o seu e-mail.', 'success'); }
+        }
+        
+        function showChangePasswordForm(perfil) {
+            // ... Lógica de primeiro acesso (Mantida)
+            document.getElementById('senhaUsu').style.display='none';
+            document.getElementById('novaSenhaDiv').style.display='block';
+            document.getElementById('confSenhaDiv').style.display='block';
+            document.getElementById('btnSalvarSenha').style.display='block';
+            document.getElementById('btnLogin').style.display='none';
+            document.getElementById('linkEsqueciSenha').style.display='none';
+            document.getElementById('login-feedback').textContent = `Primeiro acesso detectado! Defina uma nova senha forte.`;
+            document.getElementById('login-feedback').style.display = 'block';
+        }
+        
+        function validarForcaSenha(senha){
+            // ... Lógica de validação de senha (Mantida)
+            if(senha.length < 8) return "A senha deve ter no mínimo 8 caracteres";
+            if(!/[A-Z]/.test(senha)) return "A senha deve conter pelo menos uma letra maiúscula";
+            if(!/[!@#$%^&*(),.?":{}|<>]/.test(senha)) return "A senha deve conter pelo menos um caractere especial";
+            return null;
+        }
+
         async function salvarNovaSenha() {
-            Swal.fire('Aviso', 'Função de salvar nova senha (Primeiro Acesso) omitida.', 'warning');
-        }
-        
-        /**
-         * @FLUXO_SUPABASE: Salva a nova senha após clicar no link do e-mail.
-         */
-        async function handleResetByToken() {
+            // ... Lógica de salvar nova senha (Mantida)
             const novaSenha = document.getElementById('novaSenha').value;
             const confSenha = document.getElementById('confSenha').value;
 
             if(!novaSenha || novaSenha!==confSenha){ Swal.fire('Erro','As senhas não conferem','error'); return; }
-            
+            const msgErro = validarForcaSenha(novaSenha);
+            if(msgErro){ Swal.fire('Erro', msgErro, 'error'); return; }
+
             blockScreen();
 
             const { error: authError } = await supabaseClient.auth.updateUser({ password: novaSenha });
+            if (authError) { unblockScreen(); Swal.fire('Erro','Falha ao atualizar senha no Auth: ' + authError.message,'error'); return; }
+
+            const { error: perfilError } = await supabaseClient.from(TABLE_NAME).update({ primeiro_acesso: false }).eq('id', perfilUsuario.id);
+            unblockScreen();
             
-            if (authError) { 
-                unblockScreen(); 
-                Swal.fire('Erro','Falha ao atualizar senha: ' + authError.message,'error'); 
-                return; 
+            if (perfilError) { 
+                Swal.fire('Atenção', 'Senha atualizada, mas falha ao marcar o primeiro acesso no perfil.','warning').then(() => { handleLogout(); });
+            } else { 
+                Swal.fire('Sucesso','Senha atualizada! Faça login com a nova senha.','success').then(() => { handleLogout(); }); 
+            }
+        }
+
+        // =======================================================
+        // INICIALIZAÇÃO
+        // =======================================================
+        async function initApp() {
+            blockScreen();
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            
+            if (session) {
+                 await supabaseClient.auth.signOut();
+                 console.info("Sessão ativa detectada e finalizada para focar no fluxo de login.");
             }
             
-            // Lógica para limpar o status de primeiro acesso (se aplicável)
-            await supabaseClient.auth.signOut();
-            history.replaceState(null, '', window.location.pathname); 
-
-            Swal.fire('Sucesso','Senha redefinida com sucesso! Faça login com sua nova senha.','success').then(() => { 
-                unblockScreen();
-                renderLogin(); 
-            });
+            renderLogin();
+            unblockScreen();
         }
 
-
-        // =======================================================
-        // INICIALIZAÇÃO E TRATAMENTO DE EVENTOS DE AUTENTICAÇÃO
-        // =======================================================
-        function initApp() {
-            blockScreen();
-            
-            const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                
-                // --- 1. TRATAMENTO DO FLUXO DE RECUPERAÇÃO DE SENHA (Token detectado) ---
-                if (event === 'PASSWORD_RECOVERY') {
-                    
-                    renderLogin(); // Garante que a estrutura HTML está pronta
-                    history.replaceState(null, '', window.location.pathname); 
-                    
-                    // FORÇA a UI a mostrar APENAS os campos de nova senha
-                    document.getElementById('emailDiv').style.display='none'; 
-                    document.getElementById('senhaDiv').style.display='none'; 
-                    document.getElementById('btnLogin').style.display='none';
-                    document.getElementById('linkEsqueciSenha').style.display='none';
-                    
-                    document.getElementById('novaSenhaDiv').style.display='block';
-                    document.getElementById('confSenhaDiv').style.display='block';
-                    document.getElementById('btnSalvarSenha').style.display='block';
-                    
-                    document.getElementById('login-feedback').textContent = `Defina sua nova senha.`;
-                    document.getElementById('login-feedback').style.display = 'block';
-
-                    // Configura o botão para a função de troca de senha via TOKEN
-                    document.getElementById('btnSalvarSenha').onclick = handleResetByToken;
-
-                    unblockScreen();
-                    return;
-                }
-
-                // --- 2. TRATAMENTO DA SESSÃO NORMAL ---
-                if (session) {
-                    // Se houver sessão (usuário logado), pula para o Dashboard
-                    // Aqui seria a lógica de renderMainPage(perfilUsuario)
-                    unblockScreen();
-                    Swal.fire("Sessão Ativa", "Dashboard seria renderizado aqui.", "info");
-
-                } else {
-                    // Usuário deslogado. Renderiza o Login (Abre a tela inicial)
-                    if (!perfilUsuario) {
-                         renderLogin();
-                    }
-                }
-                
-                unblockScreen();
-            });
-        }
-
-        // Chama a função de inicialização imediatamente
         initApp();
     </script>
 </body>
 </html>
+
