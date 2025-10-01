@@ -1,171 +1,82 @@
 <div class="container-fluid p-0">
-
-    <h3 class="mb-3">Gerenciamento de Usuários (CRUD)</h3>
-
-
-
-    <div class="card shadow mb-4">
-
-        <div class="card-header">Usuários Existentes</div>
-
-        <div class="card-body">
-
-            <div class="table-responsive">
-
-                <table class="table table-striped table-sm table-crud">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>Nome</th>
-
-                            <th>Nível</th>
-
-                            <th>Matrícula</th>
-
-                            <th>E-mail (Login)</th>
-
-                            <th>Ações</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="users-table-body">
-
-                        <tr><td colspan="5" class="text-center">Tabela será populada após o carregamento...</td></tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <div class="card shadow">
-
-        <div class="card-header"><h5 class="mb-0 text-dark" id="form-title">Novo Usuário</h5></div>
-
-        <div class="card-body">
-
-            <form id="formCadastroUsuario">
-
-                <input type="hidden" id="cadUserId" value=""> <div class="row mb-3">
-
-                    <div class="col-md-6">
-
-                        <label for="cadNome" class="form-label text-dark">Nome Completo:</label>
-
-                        <input type="text" id="cadNome" class="form-control" required>
-
-                    </div>
-
-                    <div class="col-md-6">
-
-                        <label for="cadNivel" class="form-label text-dark">Nível de Acesso:</label>
-
-                        <select id="cadNivel" class="form-select" required>
-
-                            <option value="">Selecione...</option>
-
-                            <option value="Administrador">Administrador</option>
-
-                            <option value="Gerente">Gerente</option>
-
-                            <option value="Padrão">Padrão</option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="row mb-3">
-
-                    <div class="col-md-6">
-
-                        <label for="cadEmail" class="form-label text-dark">E-mail (Login):</label>
-
-                        <input type="email" id="cadEmail" class="form-control" placeholder="Será usado para login" required>
-
-                    </div>
-
-                    <div class="col-md-6">
-
-                        <label for="cadEmpresa" class="form-label text-dark">Empresa:</label>
-
-                        <input type="text" id="cadEmpresa" class="form-control" required>
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="row mb-3">
-
-                    <div class="col-md-4">
-
-                        <label for="cadMatricula" class="form-label text-dark">Matrícula:</label>
-
-                        <input type="text" id="cadMatricula" class="form-control" required>
-
-                    </div>
-
-                    <div class="col-md-4">
-
-                        <label for="cadCPF" class="form-label text-dark">CPF (Somente Números):</label>
-
-                        <input type="text" id="cadCPF" class="form-control" maxlength="11" placeholder="Ex: 12345678900" required>
-
-                    </div>
-
-                    <div class="col-md-4" id="senha-field">
-
-                        <label for="cadSenha" class="form-label text-dark">Senha Inicial:</label>
-
-                        <input type="password" id="cadSenha" class="form-control" placeholder="Mínimo 8 caracteres" required>
-
-                    </div>
-
-                </div>
-
-                <p id="cadastro-feedback" class="text-danger mt-2" style="display:none;"></p>
-
-            </form>
-
-        </div>
-
-        <div class="card-footer d-flex justify-content-end">
-
-            <button type="button" class="btn btn-warning me-2" id="btnLimparForm" onclick="resetForm(true)" style="display: none;">
-
-                <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 5px; vertical-align: middle;">refresh</span>
-
-                Limpar / Novo
-
-            </button>
-
-            <button type="submit" class="btn btn-primary" form="formCadastroUsuario" id="btnSalvarUsuario">
-
-                 <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 5px; vertical-align: middle;">person_add</span>
-
-                 Cadastrar Usuário
-
-            </button>
-
-        </div>
-
-    </div>
-
-
-
+    <h3 class="mb-3">Gerenciamento de Usuários (CRUD)</h3>
+    <div class="card shadow mb-4">
+        <div class="card-header">Usuários Existentes</div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-sm table-crud">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Nível</th>
+                            <th>Matrícula</th>
+                            <th>E-mail (Login)</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr><td colspan="5" class="text-center">Tabela será populada após o carregamento...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow">
+        <div class="card-header"><h5 class="mb-0 text-dark" id="form-title">Novo Usuário</h5></div>
+        <div class="card-body">
+            <form id="formCadastroUsuario">
+                <input type="hidden" id="cadUserId" value="">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="cadNome" class="form-label text-dark">Nome Completo:</label>
+                        <input type="text" id="cadNome" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="cadNivel" class="form-label text-dark">Nível de Acesso:</label>
+                        <select id="cadNivel" class="form-select" required>
+                            <option value="">Selecione...</option>
+                            <option value="Administrador">Administrador</option>
+                            <option value="Gerente">Gerente</option>
+                            <option value="Padrão">Padrão</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="cadEmail" class="form-label text-dark">E-mail (Login):</label>
+                        <input type="email" id="cadEmail" class="form-control" placeholder="Será usado para login" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="cadEmpresa" class="form-label text-dark">Empresa:</label>
+                        <input type="text" id="cadEmpresa" class="form-control" required>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="cadMatricula" class="form-label text-dark">Matrícula:</label>
+                        <input type="text" id="cadMatricula" class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="cadCPF" class="form-label text-dark">CPF (Somente Números):</label>
+                        <input type="text" id="cadCPF" class="form-control" maxlength="11" placeholder="Ex: 12345678900" required>
+                    </div>
+                    <div class="col-md-4" id="senha-field">
+                        <label for="cadSenha" class="form-label text-dark">Senha Inicial:</label>
+                        <input type="password" id="cadSenha" class="form-control" placeholder="Mínimo 8 caracteres" required>
+                    </div>
+                </div>
+                <p id="cadastro-feedback" class="text-danger mt-2" style="display:none;"></p>
+            </form>
+        </div>
+        <div class="card-footer d-flex justify-content-end">
+            <button type="button" class="btn btn-warning me-2" id="btnLimparForm" onclick="resetForm(true)" style="display: none;">
+                <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 5px; vertical-align: middle;">refresh</span>
+                Limpar / Novo
+            </button>
+            <button type="submit" class="btn btn-primary" form="formCadastroUsuario" id="btnSalvarUsuario">
+                 <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 5px; vertical-align: middle;">person_add</span>
+                 Cadastrar Usuário
+            </button>
+        </div>
+    </div>
 </div>
