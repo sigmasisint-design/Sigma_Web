@@ -25,7 +25,7 @@ html, body {
     max-width: 400px;
 }
 
-/* AJUSTE: Diminuição da fonte e remoção do negrito do título */
+/* AJUSTES DE FONTES NO LOGIN/LAYOUT */
 .login-card h4 { 
     text-align: center; 
     margin: 0; 
@@ -35,7 +35,6 @@ html, body {
     font-weight: normal; 
 }
 
-/* AJUSTE: Diminuição da fonte do subtítulo */
 .login-card .subtitulo { 
     font-size: 0.75rem; 
     text-align: center; 
@@ -45,7 +44,6 @@ html, body {
     font-weight: normal; 
 }
 
-/* AJUSTE: Diminuição da fonte e remoção do negrito das labels/feedback */
 .login-card .form-label { 
     margin-bottom: 2px; 
     color: #1565C0; 
@@ -97,7 +95,6 @@ html, body {
     white-space: nowrap;
 }
 
-/* AJUSTE: Diminuição da fonte do nome de usuário e remoção do negrito */
 .user-profile .user-greeting {
     font-size: 0.70rem; 
     margin-bottom: 0px;
@@ -199,7 +196,8 @@ html, body {
     border-top: 1px solid #dee2e6;
 }
 
-/* Estilos Específicos do CRUD de Usuários */
+/* * ESTILOS ESPECÍFICOS DO CRUD DE USUÁRIOS (Corrigidos) 
+ */
 
 .table-responsive {
     max-height: 40vh;
@@ -208,6 +206,7 @@ html, body {
     border-radius: .25rem;
 }
 
+/* Define tamanho da fonte e alinhamento vertical para células da tabela */
 .table-crud th, .table-crud td {
     font-size: 0.85rem;
     vertical-align: middle;
@@ -215,7 +214,19 @@ html, body {
     color: #333;
 }
 
+/* Estilo para os botões de ação (editar/excluir) ficarem compactos */
 .btn-acao {
     padding: 4px 6px;
     font-size: 14px;
+    line-height: 1; /* Garante que o ícone fique centralizado */
+    display: inline-flex; /* Permite centralizar o ícone com flexbox */
+    align-items: center;
+    justify-content: center;
+}
+
+/* Garante que os ícones dentro dos botões de ação fiquem menores e alinhados */
+.btn-acao .material-symbols-outlined {
+    font-size: 14px; 
+    margin: 0;
+    padding: 0;
 }
