@@ -1,27 +1,12 @@
 <div class="container-fluid p-0">
     <h3 class="mb-3">Gerenciamento de Usuários (CRUD)</h3>
-    <div class="card shadow mb-4">
-        <div class="card-header">Usuários Existentes</div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-sm table-crud">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Nível</th>
-                            <th>Matrícula</th>
-                            <th>E-mail (Login)</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table-body">
-                        <tr><td colspan="5" class="text-center">Tabela será populada após o carregamento...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <div class="card shadow">
+
+    <button type="button" class="btn btn-primary mb-3" id="btnNovoUsuario" onclick="toggleCadastroForm('show')">
+        <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 5px; vertical-align: middle;">add</span>
+        Novo Usuário
+    </button>
+    
+    <div class="card shadow mb-4" id="form-card" style="display:none;">
         <div class="card-header"><h5 class="mb-0 text-dark" id="form-title">Novo Usuário</h5></div>
         <div class="card-body">
             <form id="formCadastroUsuario">
@@ -69,7 +54,7 @@
             </form>
         </div>
         <div class="card-footer d-flex justify-content-end">
-            <button type="button" class="btn btn-warning me-2" id="btnLimparForm" onclick="resetForm(true)" style="display: none;">
+            <button type="button" class="btn btn-warning me-2" id="btnLimparForm" onclick="resetForm(true); toggleCadastroForm('hide');">
                 <span class="material-symbols-outlined" style="font-size: 18px; margin-right: 5px; vertical-align: middle;">refresh</span>
                 Limpar / Novo
             </button>
@@ -79,4 +64,26 @@
             </button>
         </div>
     </div>
+    
+    <div class="card shadow mb-4"> 
+        <div class="card-header">Usuários Existentes</div> 
+        <div class="card-body"> 
+            <div class="table-responsive"> 
+                <table class="table table-striped table-sm table-crud"> 
+                    <thead> 
+                        <tr> 
+                            <th>Nome</th> 
+                            <th>Nível</th> 
+                            <th>Matrícula</th> 
+                            <th>E-mail (Login)</th> 
+                            <th>Ações</th> 
+                        </tr> 
+                    </thead> 
+                    <tbody id="users-table-body"> 
+                        <tr><td colspan="5" class="text-center">Tabela será populada após o carregamento...</td></tr> 
+                    </tbody> 
+                </table> 
+            </div> 
+        </div> 
+    </div> 
 </div>
