@@ -86,4 +86,25 @@
             </div> 
         </div> 
     </div> 
+
+    <script>
+        /**
+         * Alterna a visibilidade do formulário de cadastro e do botão "Novo Usuário".
+         * @param {string} action 'show' para mostrar o formulário e esconder o botão 'Novo', 'hide' para o contrário.
+         */
+        function toggleCadastroForm(action) {
+            const formCard = document.getElementById('form-card');
+            const btnNovo = document.getElementById('btnNovoUsuario');
+
+            if (action === 'show') {
+                formCard.style.display = 'block';
+                btnNovo.style.display = 'none';
+                // Opcional: rolar a tela para o topo do formulário
+                formCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+            } else if (action === 'hide') {
+                formCard.style.display = 'none';
+                btnNovo.style.display = 'block';
+            }
+        }
+    </script>
 </div>
