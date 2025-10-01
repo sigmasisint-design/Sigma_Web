@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
     <style>
-        /* Estilos CSS (Não alterados) */
+        /* Estilos CSS */
         html, body {
             height: 100%;
             margin: 0;
@@ -216,8 +216,8 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54Z2NjYnZmY3hidWtoY2lrbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyODkzMDAsImV4cCI6MjA3Mzg2NTMwMH0.8iTGv8HzocnJBXB9xT5VUNbwidceKIIbZDuwhGKnahk';
         const TABLE_NAME = 'perfis';
 
-        // **** CONFIGURAÇÃO CRÍTICA PARA SESSIONSTORAGE ****
-        // Usar sessionStorage garante que a sessão seja apagada ao fechar o navegador/aba.
+        // **** CONFIGURAÇÃO CRÍTICA: USANDO SESSIONSTORAGE ****
+        // Garante que a sessão seja apagada ao fechar o navegador/aba.
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
                 storageKey: 'supabase.auth.session', 
@@ -248,6 +248,7 @@
         }
         
         // --- FUNÇÕES DE CRUD (MOCKUP/INTEGRAÇÃO) ---
+        // Funções para gerenciar o CRUD de usuários (necessitam do arquivo crud-usuarios.html)
         
         function resetForm(clearOnly = false) {
             const form = document.getElementById('formCadastroUsuario');
@@ -712,6 +713,7 @@
             }
         }
         
+        // Lógica de atualização de senha após o link de recuperação (com token)
         async function handlePasswordUpdate() {
             const novaSenha = document.getElementById('novaSenha').value;
             const confSenha = document.getElementById('confSenha').value;
@@ -724,7 +726,6 @@
             blockScreen();
             btnSalvar.disabled = true;
 
-            // O Supabase usa o token da URL/Sessão para permitir o updateUser
             const { error } = await supabaseClient.auth.updateUser({ password: novaSenha });
             
             unblockScreen();
@@ -796,12 +797,20 @@
         }
 
         // Função para renderizar formulário de alteração de senha após clique no e-mail (Token)
-        function renderChangePasswordForm(message = "Defina sua nova senha.") {
+        function renderChangePasswordForm(message = "Defina sua nova senha.", emailParaPreencher = "") {
             renderLogin(); // Renderiza o HTML base do login
+            
+            // Oculta os campos de senha antiga
             document.getElementById('senhaUsu').style.display='none';
+            // Exibe os campos de nova senha
             document.getElementById('novaSenhaDiv').style.display='block';
             document.getElementById('confSenhaDiv').style.display='block';
             
+            // Preenche e desabilita o campo de E-mail (Requisito: Email preenchido e não editável)
+            const emailInput = document.getElementById('idUsu');
+            emailInput.value = emailParaPreencher;
+            emailInput.disabled = true; 
+
             // Altera o botão de login para o botão de salvar a nova senha
             document.getElementById('btnLogin').style.display='none';
             const btnSalvar = document.getElementById('btnSalvarSenha');
@@ -943,12 +952,11 @@
             if (type === 'recovery' && accessToken) {
                 blockScreen();
                 
-                // Tenta usar o token para obter a sessão
+                // 1. Tenta usar o token para obter a sessão
                 const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
                 
-                unblockScreen();
-                
                 if (sessionError || !session) {
+                    unblockScreen();
                     // Limpa o URL e vai para o login com erro
                     window.history.replaceState({}, document.title, window.location.pathname);
                     Swal.fire('Erro de Token', 'O link de recuperação expirou ou é inválido.', 'error');
@@ -956,8 +964,13 @@
                     return true; 
                 }
                 
-                // Se a sessão for válida, mostra o formulário de mudança de senha
-                renderChangePasswordForm("Token de recuperação detectado. Defina a nova senha.");
+                // 2. EXTRAI O EMAIL DO OBJETO DE SESSÃO DO SUPABASE
+                const userEmail = session.user.email;
+
+                unblockScreen();
+                
+                // 3. Mostra o formulário de mudança de senha com o e-mail preenchido e desabilitado
+                renderChangePasswordForm("Token de recuperação detectado. Defina a nova senha.", userEmail);
                 return true; 
             }
             return false; 
@@ -974,7 +987,7 @@
             }
 
             // 2. Segunda Prioridade: Sessão Ativa
-            // O getSession usa o sessionStorage, garantindo que se o navegador foi fechado, a sessão não volte.
+            // Usa o sessionStorage (limpa ao fechar o navegador)
             const { data: { session } } = await supabaseClient.auth.getSession();
             
             if (session) {
@@ -991,11 +1004,11 @@
                     unblockScreen();
                     return;
                 } else {
-                    // Se o perfil falhar (RLS, etc.), faz logout e vai para o login
+                    // Se o perfil falhar, faz logout e vai para o login
                     await supabaseClient.auth.signOut();
                 }
             } else {
-                // Sessão não encontrada no sessionStorage, garante o logout (limpeza de token antigo do localStorage)
+                // Sem sessão encontrada, garante o logout (limpeza de token antigo do localStorage)
                 await supabaseClient.auth.signOut();
             }
             
