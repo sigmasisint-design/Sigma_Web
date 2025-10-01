@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
     <style>
+        /* Estilos CSS (Não alterados) */
         html, body {
             height: 100%;
             margin: 0;
@@ -215,7 +216,19 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54Z2NjYnZmY3hidWtoY2lrbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyODkzMDAsImV4cCI6MjA3Mzg2NTMwMH0.8iTGv8HzocnJBXB9xT5VUNbwidceKIIbZDuwhGKnahk';
         const TABLE_NAME = 'perfis';
 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // **** CONFIGURAÇÃO CRÍTICA PARA SESSIONSTORAGE ****
+        // Usar sessionStorage garante que a sessão seja apagada ao fechar o navegador/aba.
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                storageKey: 'supabase.auth.session', 
+                storage: window.sessionStorage,       
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        });
+        // *************************************************
+
         
         let perfilUsuario = null;
         let sessaoIDAtual = null;
@@ -234,7 +247,8 @@
             });
         }
         
-        // Funções do CRUD de Usuários (necessárias para a lógica)
+        // --- FUNÇÕES DE CRUD (MOCKUP/INTEGRAÇÃO) ---
+        
         function resetForm(clearOnly = false) {
             const form = document.getElementById('formCadastroUsuario');
             if (!form) return;
@@ -519,7 +533,8 @@
             }
         }
         
-        // Funções de Login e Segurança
+        // --- FUNÇÕES DE LOGIN E SEGURANÇA ---
+        
         async function handleLogin() {
             const email = document.getElementById('idUsu').value;
             const password = document.getElementById('senhaUsu').value;
@@ -578,6 +593,7 @@
                 return;
             }
             
+            // LÓGICA DE SESSÃO ÚNICA
             if (perfil.sessao_atual && perfil.sessao_atual !== userSessionId) {
                 unblockScreen();
                 Swal.fire({
@@ -616,6 +632,7 @@
                 return;
             }
             
+            // REGISTRA A NOVA SESSÃO SE NÃO HOUVER CONFLITO
             const { error: sessionUpdateError } = await authenticatedClient
                 .from(TABLE_NAME)
                 .update({
@@ -643,8 +660,10 @@
         async function handleLogout() {
             blockScreen();
             if (perfilUsuario) {
+                // Remove a sessão do banco de dados
                 await supabaseClient.from(TABLE_NAME).update({ sessao_atual: null }).eq('id', perfilUsuario.id);
             }
+            // Invalida a sessão no navegador (sessionStorage)
             await supabaseClient.auth.signOut();
             sessaoIDAtual = null;
             perfilUsuario = null;
@@ -657,44 +676,12 @@
             const email = document.getElementById("idUsu").value.trim();
             if (!email) { Swal.fire("Atenção", "Preencha o E-mail para solicitar a nova senha", "warning"); return; }
             blockScreen();
-            // O Supabase enviará um link para o endereço atual + parâmetros de recuperação.
+            // Redireciona o usuário de volta para o index.html
             const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
             unblockScreen();
             if (error) { Swal.fire('Erro ao solicitar reset', error.message, 'error'); } else { Swal.fire('Sucesso', 'Instruções para reset de senha enviadas para o seu e-mail.', 'success'); }
         }
         
-        // Função para alterar senha no primeiro acesso
-        function showChangePasswordForm(perfil) {
-            document.getElementById('senhaUsu').style.display='none';
-            document.getElementById('novaSenhaDiv').style.display='block';
-            document.getElementById('confSenhaDiv').style.display='block';
-            document.getElementById('btnSalvarSenha').style.display='block';
-            document.getElementById('btnLogin').style.display='none';
-            document.getElementById('linkEsqueciSenha').style.display='none';
-            document.getElementById('login-feedback').textContent = `Primeiro acesso detectado! Defina uma nova senha forte.`;
-            document.getElementById('login-feedback').style.display = 'block';
-        }
-
-        // Função para renderizar formulário de alteração de senha após clique no e-mail (Token)
-        function renderChangePasswordForm(message = "Defina sua nova senha.") {
-            renderLogin(); // Renderiza o HTML base do login
-            document.getElementById('senhaUsu').style.display='none';
-            document.getElementById('novaSenhaDiv').style.display='block';
-            document.getElementById('confSenhaDiv').style.display='block';
-            
-            // Altera o botão de login para o botão de salvar a nova senha
-            document.getElementById('btnLogin').style.display='none';
-            const btnSalvar = document.getElementById('btnSalvarSenha');
-            btnSalvar.style.display='block';
-            btnSalvar.onclick = handlePasswordUpdate; // Nova função para lidar com o token
-
-            document.getElementById('linkEsqueciSenha').style.display='none';
-            document.getElementById('login-feedback').textContent = message;
-            document.getElementById('login-feedback').style.display = 'block';
-            document.getElementById('login-feedback').classList.remove('text-danger');
-            document.getElementById('login-feedback').classList.add('text-success');
-        }
-
         function validarForcaSenha(senha){
             if(senha.length < 8) return "A senha deve ter no mínimo 8 caracteres";
             if(!/[A-Z]/.test(senha)) return "A senha deve conter pelo menos uma letra maiúscula";
@@ -702,7 +689,6 @@
             return null;
         }
 
-        // Função para salvar a nova senha no primeiro acesso
         async function salvarNovaSenha() {
             const novaSenha = document.getElementById('novaSenha').value;
             const confSenha = document.getElementById('confSenha').value;
@@ -726,7 +712,6 @@
             }
         }
         
-        // Função para salvar a senha após o link de recuperação (com token)
         async function handlePasswordUpdate() {
             const novaSenha = document.getElementById('novaSenha').value;
             const confSenha = document.getElementById('confSenha').value;
@@ -739,7 +724,7 @@
             blockScreen();
             btnSalvar.disabled = true;
 
-            // O Supabase já tem a sessão ativa via token, basta chamar updateUser
+            // O Supabase usa o token da URL/Sessão para permitir o updateUser
             const { error } = await supabaseClient.auth.updateUser({ password: novaSenha });
             
             unblockScreen();
@@ -756,7 +741,8 @@
             }
         }
 
-        // Renderização da página de Login
+        // --- FUNÇÕES DE RENDERIZAÇÃO DE TELA ---
+
         function renderLogin() {
             mainContainer.innerHTML = `
                 <div class="login-container" id="login-container">
@@ -783,7 +769,6 @@
                             <label for="confSenha" class="form-label">Confirme a Senha:</label>
                             <input type="password" id="confSenha" class="form-control" placeholder="Confirme a nova senha">
                         </div>
-
                         <button class="btn btn-primary w-100" id="btnLogin" onclick="handleLogin()">Entrar</button>
                         <button class="btn btn-success w-100" id="btnSalvarSenha" style="display:none;" onclick="salvarNovaSenha()">Salvar Senha</button>
 
@@ -797,6 +782,39 @@
             `;
         }
         
+        // Função para alterar senha no primeiro acesso
+        function showChangePasswordForm(perfil) {
+            document.getElementById('senhaUsu').style.display='none';
+            document.getElementById('novaSenhaDiv').style.display='block';
+            document.getElementById('confSenhaDiv').style.display='block';
+            document.getElementById('btnSalvarSenha').style.display='block';
+            document.getElementById('btnLogin').style.display='none';
+            document.getElementById('linkEsqueciSenha').style.display='none';
+            document.getElementById('login-feedback').textContent = `Primeiro acesso detectado! Defina uma nova senha forte.`;
+            document.getElementById('login-feedback').style.display = 'block';
+            document.getElementById('btnSalvarSenha').onclick = salvarNovaSenha; // Conecta a função de primeiro acesso
+        }
+
+        // Função para renderizar formulário de alteração de senha após clique no e-mail (Token)
+        function renderChangePasswordForm(message = "Defina sua nova senha.") {
+            renderLogin(); // Renderiza o HTML base do login
+            document.getElementById('senhaUsu').style.display='none';
+            document.getElementById('novaSenhaDiv').style.display='block';
+            document.getElementById('confSenhaDiv').style.display='block';
+            
+            // Altera o botão de login para o botão de salvar a nova senha
+            document.getElementById('btnLogin').style.display='none';
+            const btnSalvar = document.getElementById('btnSalvarSenha');
+            btnSalvar.style.display='block';
+            btnSalvar.onclick = handlePasswordUpdate; // Conecta a função de recuperação de senha
+
+            document.getElementById('linkEsqueciSenha').style.display='none';
+            document.getElementById('login-feedback').textContent = message;
+            document.getElementById('login-feedback').style.display = 'block';
+            document.getElementById('login-feedback').classList.remove('text-danger');
+            document.getElementById('login-feedback').classList.add('text-success');
+        }
+
         function toggleSidebar(){
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('collapsed');
@@ -827,7 +845,7 @@
 
             if (pageName === 'Usuários') {
                 try {
-                    // BUSCA O HTML EXTERNO
+                    // BUSCA O HTML EXTERNO (MÓDULO DE CRUD)
                     const response = await fetch('crud-usuarios.html'); 
                     if (!response.ok) {
                         throw new Error(`Erro ao carregar o arquivo: ${response.statusText}`);
@@ -914,7 +932,8 @@
             loadPage('Dashboard');
         }
 
-        // NOVO: Checa se há token de recuperação na URL
+        // --- LÓGICA DE INICIALIZAÇÃO E CHECAGEM DE URL ---
+
         async function checkURLForPasswordReset() {
             const hash = window.location.hash;
             const urlParams = new URLSearchParams(hash.substring(1));
@@ -924,20 +943,20 @@
             if (type === 'recovery' && accessToken) {
                 blockScreen();
                 
-                // Tenta usar o token para obter a sessão e o usuário
+                // Tenta usar o token para obter a sessão
                 const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
                 
                 unblockScreen();
                 
                 if (sessionError || !session) {
-                    // Remove o token para evitar loop/re-tentativa e volta para o login normal com erro
+                    // Limpa o URL e vai para o login com erro
                     window.history.replaceState({}, document.title, window.location.pathname);
                     Swal.fire('Erro de Token', 'O link de recuperação expirou ou é inválido.', 'error');
                     renderLogin();
                     return true; 
                 }
                 
-                // Se a sessão for estabelecida, mostra o formulário de mudança de senha
+                // Se a sessão for válida, mostra o formulário de mudança de senha
                 renderChangePasswordForm("Token de recuperação detectado. Defina a nova senha.");
                 return true; 
             }
@@ -947,18 +966,18 @@
         async function initApp() {
             blockScreen();
             
-            // 1. Checa se o token de recuperação está na URL
+            // 1. Prioridade: Redefinição de Senha
             const isResetFlow = await checkURLForPasswordReset();
             if (isResetFlow) {
                 unblockScreen();
                 return;
             }
 
-            // 2. Tenta obter a sessão atual (para login normal)
+            // 2. Segunda Prioridade: Sessão Ativa
+            // O getSession usa o sessionStorage, garantindo que se o navegador foi fechado, a sessão não volte.
             const { data: { session } } = await supabaseClient.auth.getSession();
             
             if (session) {
-                // Se houver sessão, tente carregar o perfil e ir para a página principal
                 const userId = session.user.id;
                 const { data: perfil, error: perfilError } = await supabaseClient
                     .from(TABLE_NAME)
@@ -972,16 +991,20 @@
                     unblockScreen();
                     return;
                 } else {
-                    // Se o perfil falhar, faz logout por segurança
+                    // Se o perfil falhar (RLS, etc.), faz logout e vai para o login
                     await supabaseClient.auth.signOut();
                 }
+            } else {
+                // Sessão não encontrada no sessionStorage, garante o logout (limpeza de token antigo do localStorage)
+                await supabaseClient.auth.signOut();
             }
             
-            // 3. Se não houver sessão válida nem token de reset, mostra o login
+            // 3. Padrão: Tela de Login
             renderLogin();
             unblockScreen();
         }
 
+        // INICIA O APLICATIVO
         initApp();
     </script>
 </body>
