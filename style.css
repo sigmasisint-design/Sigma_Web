@@ -25,7 +25,6 @@ html, body {
     max-width: 400px;
 }
 
-/* AJUSTES DE FONTES NO LOGIN/LAYOUT */
 .login-card h4 { 
     text-align: center; 
     margin: 0; 
@@ -196,8 +195,9 @@ html, body {
     border-top: 1px solid #dee2e6;
 }
 
-/* * ESTILOS ESPECÍFICOS DO CRUD DE USUÁRIOS (Corrigidos) 
- */
+/* ---------------------------------------------------------------------- */
+/* ESTILOS DE CRUD DE USUÁRIOS (Versão corrigida para aparência original) */
+/* ---------------------------------------------------------------------- */
 
 .table-responsive {
     max-height: 40vh;
@@ -206,25 +206,28 @@ html, body {
     border-radius: .25rem;
 }
 
-/* Define tamanho da fonte e alinhamento vertical para células da tabela */
 .table-crud th, .table-crud td {
+    /* Diminui a fonte e garante alinhamento */
     font-size: 0.85rem;
     vertical-align: middle;
     white-space: nowrap;
     color: #333;
+    /* Reduz o padding da célula para compactar a tabela */
+    padding-top: 0.3rem !important;
+    padding-bottom: 0.3rem !important;
 }
 
-/* Estilo para os botões de ação (editar/excluir) ficarem compactos */
 .btn-acao {
+    /* Deixa o botão pequeno, como o Bootstrap `btn-sm`, mas garante alinhamento de ícone */
     padding: 4px 6px;
     font-size: 14px;
-    line-height: 1; /* Garante que o ícone fique centralizado */
-    display: inline-flex; /* Permite centralizar o ícone com flexbox */
+    line-height: 1;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Garante que os ícones dentro dos botões de ação fiquem menores e alinhados */
+/* Garante que os ícones fiquem do tamanho exato do original */
 .btn-acao .material-symbols-outlined {
     font-size: 14px; 
     margin: 0;
