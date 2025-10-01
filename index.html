@@ -658,8 +658,28 @@
             renderMainPage(perfilUsuario);
         }
 
-        // Função de Logout modificada para ir direto para o login após sucesso
+        // Função de Logout com confirmação
         async function handleLogout(showPopup = true) {
+            
+            if (showPopup) {
+                const result = await Swal.fire({
+                    title: "Deseja realmente sair?",
+                    text: "Sua sessão será encerrada. Você precisará fazer login novamente.",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sim, Sair',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                // Se o usuário clicar em 'Cancelar', a função para aqui.
+                if (!result.isConfirmed) {
+                    return; 
+                }
+            }
+            
+            // Procede com o encerramento da sessão
             blockScreen();
             if (perfilUsuario) {
                 // Remove a sessão do banco de dados
@@ -671,9 +691,12 @@
             perfilUsuario = null;
 
             unblockScreen();
+            
             if (showPopup) {
+                // Mensagem de sucesso após a saída confirmada
                 Swal.fire({ title: "Logout", text: "Sessão encerrada com sucesso.", icon: "info", allowOutsideClick: false, confirmButtonText: "OK" }).then(() => { renderLogin(); });
             } else {
+                // Fluxo silencioso (após troca de senha)
                 renderLogin();
             }
         }
@@ -715,7 +738,7 @@
             if (perfilError) {
                 Swal.fire('Atenção', 'Senha atualizada, mas falha ao marcar o primeiro acesso no perfil.','warning').then(() => { handleLogout(true); });
             } else {
-                // MELHORIA 2: Vai direto para o login sem mensagem intermediária
+                // Vai direto para o login sem mensagem intermediária
                 await Swal.fire('Sucesso','Senha atualizada! Faça login com a nova senha.','success');
                 handleLogout(false);
             }
@@ -742,7 +765,7 @@
             if (error) {
                 Swal.fire('Erro ao Atualizar', 'Falha ao atualizar a senha: ' + error.message, 'error');
             } else {
-                // MELHORIA 2: Vai direto para o login sem mensagem intermediária
+                // Vai direto para o login sem mensagem intermediária
                 await Swal.fire('Sucesso!', 'Sua senha foi atualizada. Faça login.', 'success');
                 
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -793,7 +816,7 @@
         
         // Função para alterar senha no primeiro acesso
         function showChangePasswordForm(perfil) {
-            // MELHORIA 3: Esconde o container Senha/Label
+            // Esconde o container Senha/Label
             document.getElementById('senhaUsuContainer').style.display='none';
             
             document.getElementById('novaSenhaDiv').style.display='block';
@@ -805,7 +828,7 @@
             document.getElementById('login-feedback').style.display = 'block';
             document.getElementById('btnSalvarSenha').onclick = salvarNovaSenha; 
             
-            // MELHORIA 1: Bloqueia o campo e-mail
+            // Bloqueia o campo e-mail
             document.getElementById('idUsu').disabled = true; 
         }
 
@@ -813,7 +836,7 @@
         function renderChangePasswordForm(message = "Defina sua nova senha.", emailParaPreencher = "") {
             renderLogin(); // Renderiza o HTML base do login
             
-            // MELHORIA 3: Esconde o container Senha/Label
+            // Esconde o container Senha/Label
             document.getElementById('senhaUsuContainer').style.display='none';
             
             // Exibe os campos de nova senha
@@ -823,7 +846,7 @@
             // Preenche e desabilita o campo de E-mail
             const emailInput = document.getElementById('idUsu');
             emailInput.value = emailParaPreencher;
-            emailInput.disabled = true; // MELHORIA 1: Garante o campo bloqueado
+            emailInput.disabled = true; // Garante o campo bloqueado
 
             // Altera o botão de login para o botão de salvar a nova senha
             document.getElementById('btnLogin').style.display='none';
