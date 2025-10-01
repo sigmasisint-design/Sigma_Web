@@ -322,7 +322,7 @@
         // =======================================================
         
         function renderLogin() {
-            // MANTIDO: Renderiza o formulário de login
+            // Garante que o container de login é renderizado
             mainContainer.innerHTML = `
                 <div class="login-container" id="login-container">
                     <div class="login-card">
@@ -360,6 +360,20 @@
                     </div>
                 </div>
             `;
+            
+            // Garante que a interface esteja no modo de login padrão.
+            // Isso é vital para limpar o estado após um logout ou um reset.
+            document.getElementById('idUsu').style.display = 'block'; 
+            document.getElementById('senhaUsu').style.display = 'block'; 
+            document.querySelector('.login-card div:nth-child(2) label').style.display = 'block'; // Label do Email
+            document.querySelector('.login-card div:nth-child(4) label').style.display = 'block'; // Label da Senha
+            
+            document.getElementById('novaSenhaDiv').style.display = 'none';
+            document.getElementById('confSenhaDiv').style.display = 'none';
+            document.getElementById('btnSalvarSenha').style.display = 'none';
+            document.getElementById('btnLogin').style.display = 'block';
+            document.getElementById('linkEsqueciSenha').style.display = 'block';
+            document.getElementById('login-feedback').style.display = 'none';
         }
         
         function toggleSidebar(){ 
@@ -894,13 +908,13 @@
          * @FLUXO_SUPABASE: Envia o link de redefinição de senha para o e-mail.
          */
         async function handlePasswordReset() {
-             const email = document.getElementById("idUsu").value.trim();
+            const email = document.getElementById("idUsu").value.trim();
             const feedback = document.getElementById('login-feedback');
             
             feedback.style.display = 'none';
 
             if (!email) { 
-                feedback.textContent = "Preencha o E-mail para solicitar a nova senha.";
+                feedback.textContent = "Preencha o E-mail para solicitar o link de redefinição de senha.";
                 feedback.style.display = 'block';
                 return; 
             }
@@ -908,8 +922,9 @@
             blockScreen();
 
             // 1. Chama o fluxo de redefinição de senha do Supabase.
-            // O redirectTo é ESSENCIAL para que o initApp intercepte o token.
+            // O redirectTo é ESSENCIAL para que o initApp intercepte o token ao clicar no link.
             const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(email, { 
+                // Redireciona para a página atual para que o initApp intercepte o token na URL.
                 redirectTo: window.location.origin + window.location.pathname 
             });
             
@@ -919,7 +934,7 @@
                 Swal.fire('Erro ao solicitar reset', resetError.message, 'error'); 
             } else { 
                 // Mensagem genérica por segurança
-                Swal.fire('Sucesso!', 
+                Swal.fire('Instruções Enviadas!', 
                     'Se o e-mail estiver cadastrado, as instruções de redefinição foram enviadas. **Clique no link** no e-mail para definir sua nova senha.', 
                     'success'); 
             }
@@ -959,6 +974,7 @@
 
             blockScreen();
 
+            // O Supabase Auth permite a atualização da própria senha se o usuário estiver logado.
             const { error: authError } = await supabaseClient.auth.updateUser({ password: novaSenha });
             if (authError) { unblockScreen(); Swal.fire('Erro','Falha ao atualizar senha no Auth: ' + authError.message,'error'); return; }
 
@@ -1025,22 +1041,20 @@
             // Configura o observador de estado de autenticação
             const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
                 
-                // --- 1. VERIFICA O EVENTO DE RECUPERAÇÃO DE SENHA ---
-                // Este evento dispara quando o Supabase reconhece o token de reset na URL.
+                // --- 1. TRATAMENTO DO FLUXO DE RECUPERAÇÃO DE SENHA ---
                 if (event === 'PASSWORD_RECOVERY') {
                     
-                    // Força o logout para garantir que a sessão temporária de reset
-                    // seja usada APENAS para a troca de senha.
-                    await supabaseClient.auth.signOut();
-                    
-                    // Limpa os parâmetros de token da URL (MUITO IMPORTANTE)
-                    history.replaceState(null, '', window.location.pathname);
-                    
+                    // Garante que o login é renderizado primeiro, antes de mudar para a tela de reset.
                     renderLogin();
                     
-                    // Configura a interface para redefinição de senha
+                    // Oculta os campos de login e exibe os campos de nova senha
                     document.getElementById('idUsu').style.display='none'; 
                     document.getElementById('senhaUsu').style.display='none'; 
+                    
+                    // Oculta os labels do email e senha
+                    document.querySelector('.login-card div:nth-child(2) label').style.display = 'none';
+                    document.querySelector('.login-card div:nth-child(4) label').style.display = 'none';
+                    
                     document.getElementById('novaSenhaDiv').style.display='block';
                     document.getElementById('confSenhaDiv').style.display='block';
                     document.getElementById('btnSalvarSenha').style.display='block';
@@ -1052,6 +1066,7 @@
 
                     // Configura o botão para chamar a função de reset por token
                     document.getElementById('btnSalvarSenha').onclick = handleResetByToken;
+
                     unblockScreen();
                     
                     // Retorna para NÃO continuar no fluxo normal de sessão
@@ -1060,14 +1075,14 @@
 
                 // --- 2. TRATAMENTO DA SESSÃO NORMAL (SIGNED_IN ou SIGNED_OUT) ---
                 if (session) {
-                    // Usuário logado (login normal ou terminou o reset)
+                    // Usuário logado
                     
                     if (perfilUsuario && perfilUsuario.id === session.user.id) {
                         unblockScreen();
                         return; 
                     }
                     
-                    // Busca o perfil do usuário
+                    // Busca o perfil do usuário (omitido o código de busca para brevidade, mas ele está acima)
                     const { data: perfil, error } = await supabaseClient
                         .from(TABLE_NAME).select(`id, bloqueado, cont_erro_login, primeiro_acesso, nome_usu, nivel_usu, sessao_atual`).eq('id', session.user.id).single();
                     
@@ -1080,9 +1095,11 @@
                     }
 
                 } else {
-                    // Usuário deslogado (logout, primeiro acesso, ou erro)
+                    // Usuário deslogado
+                    
+                    // Se o evento não foi PASSWORD_RECOVERY, garante que a tela de login é exibida.
                     if (window.location.hash || window.location.search) {
-                        // Limpa a URL se houver tokens remanescentes
+                         // Limpa a URL se houver tokens remanescentes (útil após um reset bem-sucedido)
                         history.replaceState(null, '', window.location.pathname);
                     }
                     if (!perfilUsuario) {
