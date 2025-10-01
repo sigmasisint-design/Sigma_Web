@@ -824,7 +824,7 @@
             document.getElementById('btnSalvarSenha').style.display='block';
             document.getElementById('btnLogin').style.display='none';
             document.getElementById('linkEsqueciSenha').style.display='none';
-            document.getElementById('login-feedback').textContent = `Primeiro acesso detectado! Defina uma nova senha forte.`;
+            document.getElementById('login-feedback').textContent = `Defina uma nova senha.`;
             document.getElementById('login-feedback').style.display = 'block';
             document.getElementById('btnSalvarSenha').onclick = salvarNovaSenha; 
             
@@ -1007,7 +1007,7 @@
                 unblockScreen();
                 
                 // 3. Mostra o formulário de mudança de senha com o e-mail preenchido e desabilitado
-                renderChangePasswordForm("Token de recuperação detectado. Defina a nova senha.", userEmail);
+                renderChangePasswordForm("Defina uma nova senha.", userEmail);
                 return true; 
             }
             return false; 
@@ -1059,3 +1059,4 @@
     </script>
 </body>
 </html>
+
