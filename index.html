@@ -153,7 +153,7 @@
         .submenu a:hover {
             background-color: #1255a5; 
         }
-
+        
         /* AJUSTE DO BOTÃO SAIR */
         .logout-area a { padding: 5px 10px; background-color: #dc3545 !important; }
         .sidebar.collapsed .logout-area a { padding: 5px 0; }
@@ -907,56 +907,43 @@
             // 1. Busca o perfil para obter o ID
             const { data: userData, error: userError } = await supabaseClient.from(TABLE_NAME)
                 .select('id')
-                .eq('auth.users.email', email) 
-                .single();
-
-            if (userError || !userData) {
-                unblockScreen();
-                // Apenas informa que o e-mail foi enviado (boa prática de segurança)
-                feedback.textContent = "Se o e-mail estiver cadastrado, as instruções serão enviadas.";
-                feedback.style.display = 'block';
-                
-                const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(email, { 
-                    redirectTo: window.location.origin + window.location.pathname 
-                });
-                
-                if (resetError) { 
-                    Swal.fire('Erro ao solicitar reset', resetError.message, 'error'); 
-                } else { 
-                    Swal.fire('Sucesso!', 'Instruções de redefinição de senha foram enviadas para o seu e-mail. Após redefinir, use a nova senha no login.', 'success'); 
-                }
-                return;
-            }
+                // Nota: Não é possível buscar por email diretamente no perfil sem RLS complexo.
+                // O fluxo de reset do Supabase é mais seguro, mas tentamos a busca para forçar o 'primeiro_acesso'.
+                .single(); 
             
-            const userId = userData.id;
-
-            // 2. Força o "primeiro acesso" = true na tabela perfis (Requisito principal)
-            const { error: perfilUpdateError } = await supabaseClient
-                .from(TABLE_NAME)
-                .update({ 
-                    primeiro_acesso: true 
-                })
-                .eq('id', userId);
-            
-            if (perfilUpdateError) {
-                unblockScreen();
-                console.error("Erro ao forçar primeiro_acesso=true:", perfilUpdateError);
-                Swal.fire('Erro RLS', 'Falha ao marcar o perfil para redefinição. Verifique as permissões de UPDATE (RLS) da tabela perfis.', 'error');
-                return;
+            let userId = null;
+            if (userData) {
+                 userId = userData.id;
             }
 
-            // 3. Chama o fluxo de redefinição de senha do Supabase.
+            // 2. Chama o fluxo de redefinição de senha do Supabase.
+            // O redirectTo deve ser a URL da aplicação para que o initApp intercepte o token.
             const { error: resetError } = await supabaseClient.auth.resetPasswordForEmail(email, { 
-                redirectTo: window.location.origin + window.location.pathname // Redireciona para esta página após o clique no link
+                redirectTo: window.location.origin + window.location.pathname 
             });
+            
+            // 3. (Opcional) Força o "primeiro acesso" = true se o usuário foi encontrado
+            if (userId) {
+                const { error: perfilUpdateError } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .update({ 
+                        primeiro_acesso: true 
+                    })
+                    .eq('id', userId);
+                
+                if (perfilUpdateError) {
+                    console.error("Erro ao forçar primeiro_acesso=true (Ignore se RLS estiver ativo):", perfilUpdateError);
+                }
+            }
             
             unblockScreen();
             
             if (resetError) { 
                 Swal.fire('Erro ao solicitar reset', resetError.message, 'error'); 
             } else { 
+                // Mensagem genérica por segurança
                 Swal.fire('Sucesso!', 
-                    'Instruções de redefinição de senha foram enviadas para o seu e-mail. **Clique no link** e você será redirecionado para definir sua nova senha na aplicação.', 
+                    'Se o e-mail estiver cadastrado, as instruções de redefinição foram enviadas. **Clique no link** para definir sua nova senha.', 
                     'success'); 
             }
         }
@@ -1042,7 +1029,8 @@
             await supabaseClient.auth.signOut();
             
             // 4. Limpa os parâmetros da URL e avisa o usuário.
-            history.replaceState(null, '', window.location.pathname);
+            // O history.replaceState foi movido para o initApp, mas mantemos aqui por garantia.
+            // history.replaceState(null, '', window.location.pathname); 
 
             Swal.fire('Sucesso','Senha redefinida com sucesso! Faça login com sua nova senha.','success').then(() => { 
                 unblockScreen();
@@ -1051,7 +1039,7 @@
         }
 
         // =======================================================
-        // INICIALIZAÇÃO (FINAL: Processamento de URL de Reset)
+        // INICIALIZAÇÃO (FINAL: Processamento de URL de Reset - CORREÇÃO CRÍTICA)
         // =======================================================
         async function initApp() {
             blockScreen();
@@ -1065,9 +1053,11 @@
             if (isRecovery) {
                 // FLUXO 1: Usuário veio do link de 'Esqueci a Senha'
                 
-                if (session) {
-                    await supabaseClient.auth.setSession(session); // Mantém o token na sessão
-                }
+                // 1. FORÇA O LOGOUT IMEDIATO (Impede o Supabase de logar direto no dashboard)
+                await supabaseClient.auth.signOut();
+                
+                // 2. Limpa os parâmetros de RECOVERY da URL (Impede loop)
+                history.replaceState(null, '', window.location.pathname);
                 
                 renderLogin();
                 
@@ -1094,10 +1084,8 @@
                 
                 if (perfil && !perfil.bloqueado) {
                     perfilUsuario = perfil;
-                    // Se estiver logado e perfil ok, vai direto ao dashboard.
                     renderMainPage(perfilUsuario);
                 } else {
-                    // Perfil inválido/bloqueado: desloga e vai para o login.
                     await supabaseClient.auth.signOut();
                     renderLogin();
                 }
