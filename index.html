@@ -658,7 +658,8 @@
             renderMainPage(perfilUsuario);
         }
 
-        async function handleLogout() {
+        // Função de Logout modificada para ir direto para o login após sucesso
+        async function handleLogout(showPopup = true) {
             blockScreen();
             if (perfilUsuario) {
                 // Remove a sessão do banco de dados
@@ -670,7 +671,11 @@
             perfilUsuario = null;
 
             unblockScreen();
-            Swal.fire({ title: "Logout", text: "Sessão encerrada com sucesso.", icon: "info", allowOutsideClick: false, confirmButtonText: "OK" }).then(() => { renderLogin(); });
+            if (showPopup) {
+                Swal.fire({ title: "Logout", text: "Sessão encerrada com sucesso.", icon: "info", allowOutsideClick: false, confirmButtonText: "OK" }).then(() => { renderLogin(); });
+            } else {
+                renderLogin();
+            }
         }
         
         async function handlePasswordReset() {
@@ -690,6 +695,7 @@
             return null;
         }
 
+        // Salva a nova senha no primeiro acesso (Troca de senha obrigatória)
         async function salvarNovaSenha() {
             const novaSenha = document.getElementById('novaSenha').value;
             const confSenha = document.getElementById('confSenha').value;
@@ -707,9 +713,11 @@
             unblockScreen();
             
             if (perfilError) {
-                Swal.fire('Atenção', 'Senha atualizada, mas falha ao marcar o primeiro acesso no perfil.','warning').then(() => { handleLogout(); });
+                Swal.fire('Atenção', 'Senha atualizada, mas falha ao marcar o primeiro acesso no perfil.','warning').then(() => { handleLogout(true); });
             } else {
-                Swal.fire('Sucesso','Senha atualizada! Faça login com a nova senha.','success').then(() => { handleLogout(); });
+                // MELHORIA 2: Vai direto para o login sem mensagem intermediária
+                await Swal.fire('Sucesso','Senha atualizada! Faça login com a nova senha.','success');
+                handleLogout(false);
             }
         }
         
@@ -734,11 +742,11 @@
             if (error) {
                 Swal.fire('Erro ao Atualizar', 'Falha ao atualizar a senha: ' + error.message, 'error');
             } else {
-                Swal.fire('Sucesso!', 'Sua senha foi atualizada. Faça login.', 'success').then(() => {
-                    // Remove o token da URL e renderiza o login normal
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    renderLogin();
-                });
+                // MELHORIA 2: Vai direto para o login sem mensagem intermediária
+                await Swal.fire('Sucesso!', 'Sua senha foi atualizada. Faça login.', 'success');
+                
+                window.history.replaceState({}, document.title, window.location.pathname);
+                renderLogin();
             }
         }
 
@@ -756,14 +764,14 @@
                             <input type="email" id="idUsu" class="form-control" placeholder="Digite seu E-mail" required>
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-3" id="senhaUsuContainer">
                             <label for="senhaUsu" class="form-label">Senha:</label>
                             <input type="password" id="senhaUsu" class="form-control" placeholder="Digite sua senha" required>
                         </div>
 
                         <div class="mb-3" id="novaSenhaDiv" style="display:none;">
                             <label for="novaSenha" class="form-label">Nova Senha:</label>
-                            <input type="password" id="novaSenha" class="form-control" placeholder="Digite a nova senha">
+                            <input type="password" id="novaSenha" class="form-control" placeholder="Mínimo 8 caracteres, com maiúscula e especial">
                         </div>
 
                         <div class="mb-3" id="confSenhaDiv" style="display:none;">
@@ -785,7 +793,9 @@
         
         // Função para alterar senha no primeiro acesso
         function showChangePasswordForm(perfil) {
-            document.getElementById('senhaUsu').style.display='none';
+            // MELHORIA 3: Esconde o container Senha/Label
+            document.getElementById('senhaUsuContainer').style.display='none';
+            
             document.getElementById('novaSenhaDiv').style.display='block';
             document.getElementById('confSenhaDiv').style.display='block';
             document.getElementById('btnSalvarSenha').style.display='block';
@@ -793,23 +803,27 @@
             document.getElementById('linkEsqueciSenha').style.display='none';
             document.getElementById('login-feedback').textContent = `Primeiro acesso detectado! Defina uma nova senha forte.`;
             document.getElementById('login-feedback').style.display = 'block';
-            document.getElementById('btnSalvarSenha').onclick = salvarNovaSenha; // Conecta a função de primeiro acesso
+            document.getElementById('btnSalvarSenha').onclick = salvarNovaSenha; 
+            
+            // MELHORIA 1: Bloqueia o campo e-mail
+            document.getElementById('idUsu').disabled = true; 
         }
 
         // Função para renderizar formulário de alteração de senha após clique no e-mail (Token)
         function renderChangePasswordForm(message = "Defina sua nova senha.", emailParaPreencher = "") {
             renderLogin(); // Renderiza o HTML base do login
             
-            // Oculta os campos de senha antiga
-            document.getElementById('senhaUsu').style.display='none';
+            // MELHORIA 3: Esconde o container Senha/Label
+            document.getElementById('senhaUsuContainer').style.display='none';
+            
             // Exibe os campos de nova senha
             document.getElementById('novaSenhaDiv').style.display='block';
             document.getElementById('confSenhaDiv').style.display='block';
             
-            // Preenche e desabilita o campo de E-mail (Requisito: Email preenchido e não editável)
+            // Preenche e desabilita o campo de E-mail
             const emailInput = document.getElementById('idUsu');
             emailInput.value = emailParaPreencher;
-            emailInput.disabled = true; 
+            emailInput.disabled = true; // MELHORIA 1: Garante o campo bloqueado
 
             // Altera o botão de login para o botão de salvar a nova senha
             document.getElementById('btnLogin').style.display='none';
