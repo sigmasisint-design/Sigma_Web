@@ -886,7 +886,8 @@
             perfilUsuario = null;
 
             unblockScreen(); 
-            Swal.fire({ title: "Logout", text: "Sessão encerrada com sucesso.", icon: "info", allowOutsideClick: false, confirmButtonText: "OK" }).then(() => { renderLogin(); });
+            // Limpa o estado e renderiza o login
+            renderLogin();
         }
         
         async function handlePasswordReset() {
@@ -961,7 +962,7 @@
         }
         
         function showChangePasswordForm(perfil) {
-            // ... Lógica de primeiro acesso (Mantida)
+            // Lógica de primeiro acesso ou senha expirada
             document.getElementById('senhaUsu').style.display='none';
             document.getElementById('novaSenhaDiv').style.display='block';
             document.getElementById('confSenhaDiv').style.display='block';
@@ -976,7 +977,7 @@
         }
         
         function validarForcaSenha(senha){
-            // ... Lógica de validação de senha (Mantida)
+            // Regras de validação de senha (Mínimo 8 caracteres, maiúscula, especial)
             if(senha.length < 8) return "A senha deve ter no mínimo 8 caracteres";
             if(!/[A-Z]/.test(senha)) return "A senha deve conter pelo menos uma letra maiúscula";
             if(!/[!@#$%^&*(),.?":{}|<>]/.test(senha)) return "A senha deve conter pelo menos um caractere especial";
@@ -984,7 +985,7 @@
         }
 
         async function salvarNovaSenha() {
-            // ... Lógica de salvar nova senha (Mantida)
+            // Lógica de salvar nova senha para PRIMEIRO ACESSO (após login inicial)
             const novaSenha = document.getElementById('novaSenha').value;
             const confSenha = document.getElementById('confSenha').value;
 
@@ -1009,7 +1010,7 @@
         }
         
         // =======================================================
-        // FUNÇÃO ADICIONAL: Salvar Senha após Clique no Link de Reset (CORREÇÃO)
+        // FUNÇÃO ADICIONAL: Salvar Senha após Clique no Link de Reset (FLUXO DE RECOVERY)
         // =======================================================
         async function handleResetByToken() {
             const novaSenha = document.getElementById('novaSenha').value;
@@ -1021,7 +1022,7 @@
 
             blockScreen();
 
-            // Usa o token de sessão (que o Supabase já injetou na URL) para atualizar a senha.
+            // 1. Atualiza a senha usando o token da URL/Sessão.
             const { error: authError } = await supabaseClient.auth.updateUser({ password: novaSenha });
             
             if (authError) { 
@@ -1030,39 +1031,42 @@
                 return; 
             }
             
-            // Tenta obter o perfil para atualizar o status de primeiro acesso após o reset
+            // 2. Busca o ID para remover o status de primeiro acesso no banco.
             const { data: { user } } = await supabaseClient.auth.getUser();
             
             if(user) {
                  await supabaseClient.from(TABLE_NAME).update({ primeiro_acesso: false }).eq('id', user.id);
             }
             
-            // Limpa os parâmetros da URL para evitar re-uso
+            // 3. Força um logout seguro para limpar a sessão de reset.
+            await supabaseClient.auth.signOut();
+            
+            // 4. Limpa os parâmetros da URL e avisa o usuário.
             history.replaceState(null, '', window.location.pathname);
 
-            // Redireciona para a tela de login
-            Swal.fire('Sucesso','Senha atualizada! Por favor, faça login com a nova senha.','success').then(() => { 
-                handleLogout(); 
+            Swal.fire('Sucesso','Senha redefinida com sucesso! Faça login com sua nova senha.','success').then(() => { 
+                unblockScreen();
+                renderLogin(); 
             });
         }
 
         // =======================================================
-        // INICIALIZAÇÃO (CORRIGIDO: Processamento de URL para Reset de Senha)
+        // INICIALIZAÇÃO (FINAL: Processamento de URL de Reset)
         // =======================================================
         async function initApp() {
             blockScreen();
             
-            // O Supabase tenta carregar a sessão automaticamente, inclusive de tokens de recuperação na URL.
+            // Tenta obter a sessão, que lida com tokens de recuperação na URL.
             const { data: { session } } = await supabaseClient.auth.getSession();
             
-            // Se houver parâmetros de recuperação na URL, o usuário precisa redefinir a senha
             const params = new URLSearchParams(window.location.search);
             const isRecovery = params.get('type') === 'recovery';
 
             if (isRecovery) {
-                // Se for recovery, limpamos a sessão anterior (se houver) e preparamos a tela de reset.
+                // FLUXO 1: Usuário veio do link de 'Esqueci a Senha'
+                
                 if (session) {
-                    await supabaseClient.auth.setSession(session); // Mantém o token
+                    await supabaseClient.auth.setSession(session); // Mantém o token na sessão
                 }
                 
                 renderLogin();
@@ -1079,17 +1083,27 @@
                 document.getElementById('login-feedback').textContent = `Defina sua nova senha.`;
                 document.getElementById('login-feedback').style.display = 'block';
 
-                // Garante que o botão chama a função de reset por token
+                // Configura o botão para chamar a função de reset por token
                 document.getElementById('btnSalvarSenha').onclick = handleResetByToken;
                 
             } else if (session) {
-                // Se houver uma sessão, mas não for recuperação, forçamos o logout
-                // (Isso é uma escolha para manter o fluxo de login sempre limpo e forçar o `handleLogin`)
-                await supabaseClient.auth.signOut();
-                renderLogin();
+                // FLUXO 2: Usuário já está logado ou possui sessão ativa (ex: após login normal)
                 
+                const { data: perfil, error } = await supabaseClient
+                    .from(TABLE_NAME).select(`id, bloqueado, cont_erro_login, primeiro_acesso, nome_usu, nivel_usu, sessao_atual`).eq('id', session.user.id).single();
+                
+                if (perfil && !perfil.bloqueado) {
+                    perfilUsuario = perfil;
+                    // Se estiver logado e perfil ok, vai direto ao dashboard.
+                    renderMainPage(perfilUsuario);
+                } else {
+                    // Perfil inválido/bloqueado: desloga e vai para o login.
+                    await supabaseClient.auth.signOut();
+                    renderLogin();
+                }
+
             } else {
-                // Fluxo de login normal
+                // FLUXO 3: Sem token, sem sessão. Login normal.
                 renderLogin();
             }
 
