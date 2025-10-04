@@ -15,6 +15,7 @@
         const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_DO_SUPABASE'; // Ex: 'eyJhbGciOiJIUzI1NiI...'
         const TABLE_NAME = 'perfis'; // Nome da sua tabela de perfis de usuário
 
+        // Inicializa o cliente Supabase principal
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         // *****************************************
         
@@ -80,7 +81,13 @@
         // Funções utilitárias (Mocks para funções de tela)
         function blockScreen() { loadingOverlay.style.display = 'flex'; }
         function unblockScreen() { loadingOverlay.style.display = 'none'; }
-        function generateUUID() { return 'xxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) { var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8); return v.toString(16); }); }
+        // Função simples para gerar um UUID fictício
+        function generateUUID() { 
+            return 'xxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) { 
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8); 
+                return v.toString(16); 
+            }); 
+        }
 
 
         // --- FUNÇÕES DE LOGIN E SEGURANÇA ---
@@ -114,16 +121,13 @@
                 console.warn("⚠️ Não foi possível obter o ID da sessão do Supabase. Usando UUID Fictício:", userSessionId);
             }
 
-            // 2. Cria um cliente autenticado para buscar o perfil (evita RLS do anon key)
-            const authenticatedClient = supabaseClient.from(TABLE_NAME).select(`id, bloqueado, cont_erro_login, primeiro_acesso, nome_usu, nivel_usu, sessao_atual`).eq('id', userId).single();
-            
-            // Re-cria o cliente autenticado (corrigindo a sintaxe de criação que estava na função original)
-            const newAuthenticatedClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            // 2. Cria um cliente autenticado para buscar o perfil (usa o token para respeitar RLS)
+            const authenticatedClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 global: { headers: { Authorization: `Bearer ${accessToken}` } }
             });
 
             // 3. Busca o perfil na tabela 'perfis'
-            const { data: perfil, error: perfilError } = await newAuthenticatedClient
+            const { data: perfil, error: perfilError } = await authenticatedClient
                 .from(TABLE_NAME).select(`id, bloqueado, cont_erro_login, primeiro_acesso, nome_usu, nivel_usu, sessao_atual`).eq('id', userId).single();
             
             if (perfilError || !perfil) {
@@ -163,7 +167,7 @@
                     if (result.isConfirmed) {
                         blockScreen();
                         // 5. Atualiza o perfil forçando a nova sessão
-                        const { error: sessionUpdateError } = await newAuthenticatedClient.from(TABLE_NAME).update({
+                        const { error: sessionUpdateError } = await authenticatedClient.from(TABLE_NAME).update({
                             sessao_atual: userSessionId,
                             cont_erro_login: 0
                         }).eq('id', perfil.id);
@@ -190,7 +194,7 @@
             }
             
             // 6. REGISTRA A NOVA SESSÃO SE NÃO HOUVER CONFLITO
-            const { error: sessionUpdateError } = await newAuthenticatedClient
+            const { error: sessionUpdateError } = await authenticatedClient
                 .from(TABLE_NAME)
                 .update({
                     cont_erro_login: 0,
@@ -421,7 +425,7 @@
             }
         }
 
-        // Função de carregamento de página simplificada (sem a lógica de CRUD)
+        // Função de carregamento de página simplificada
         async function loadPage(pageName) {
             const content = document.getElementById('page-content');
             const topbarTitle = document.getElementById('topbar-title');
