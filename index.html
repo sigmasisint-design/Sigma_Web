@@ -1,576 +1,1060 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGMA - Gestão Inteligente</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        // *** VARIÁVEIS DE AMBIENTE - AJUSTE AQUI ***
-        const SUPABASE_URL = 'SUA_URL_DO_SUPABASE'; // Ex: 'https://xyz1234.supabase.co'
-        const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_DO_SUPABASE'; // Ex: 'eyJhbGciOiJIUzI1NiI...'
-        const TABLE_NAME = 'perfis'; // Nome da sua tabela de perfis de usuário
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%231565C0%22><path d=%22M11 20v-5h-4l6-11v5h4l-6 11z%22/><text x=%2222%22 y=%2220%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%231565C0%22>Σ</text></svg>">
+    <title>SIGMA - Gestão Inteligente</title>
 
-        // Inicializa o cliente Supabase principal
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        // *****************************************
-        
-        let perfilUsuario = null; // Armazena os dados do perfil do usuário logado
-    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-    <style>
-        /* CSS BÁSICO PARA O LAYOUT (Baseado nas classes usadas) */
-        body { font-family: 'Arial', sans-serif; background-color: #f4f7f6; }
-        .login-container { display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .login-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; }
-        .subtitulo { color: #6c757d; margin-bottom: 20px; font-size: 0.9em; text-align: center; }
-        .login-card h4 { text-align: center; color: #007bff; font-weight: 700; }
-        
-        /* Layout Principal (Main Wrapper) */
-        .main-wrapper { display: flex; height: 100vh; overflow: hidden; }
-        
-        /* Sidebar */
-        .sidebar { width: 250px; background-color: #2c3e50; color: white; transition: width 0.3s; display: flex; flex-direction: column; }
-        .sidebar.collapsed { width: 60px; }
-        .sidebar .menu-items { flex-grow: 1; padding-top: 20px; }
-        .sidebar a { display: flex; align-items: center; padding: 10px 15px; text-decoration: none; color: white; transition: background-color 0.2s; }
-        .sidebar a:hover { background-color: #34495e; }
-        .sidebar .icon { margin-right: 15px; font-size: 24px; }
-        .sidebar.collapsed .text, .sidebar.collapsed .user-profile, .sidebar.collapsed .expand-icon { display: none; }
-        .sidebar.collapsed .icon { margin-right: 0; }
-        .sidebar .user-profile { padding: 10px 15px; text-align: center; border-bottom: 1px solid #4a627a; }
-        .sidebar .user-name { font-weight: bold; }
-        
-        /* Submenu */
-        .submenu a { padding-left: 45px; background-color: #3f5872; }
-        
-        /* Logout Area */
-        .logout-area { border-top: 1px solid #4a627a; padding: 10px 0; }
-        
-        /* Content Wrapper */
-        .content-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
-        .topbar { background-color: #ffffff; padding: 15px 25px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); font-size: 1.2em; font-weight: 600; color: #333; }
-        .content { padding: 25px; flex-grow: 1; }
-        .footer { background-color: #ecf0f1; padding: 10px 25px; font-size: 0.8em; color: #7f8c8d; display: flex; justify-content: space-between; }
-        
-        /* Overlay para bloqueio de tela */
-        #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center; color: white; font-size: 1.5em; }
-    </style>
+    <style>
+        /* Estilos CSS */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            font-size: 0.95rem;
+            color: #1565C0;
+            background: #f5f6fa;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-card h4 { text-align: center; margin: 0; line-height: 1; color: #1565C0; font-size: 2.2rem; }
+        .login-card .subtitulo { font-size: 0.85rem; text-align: center; color: #1565C0; margin: 0; line-height: 1; }
+        
+        .login-card .form-label { margin-bottom: 2px; color: #1565C0; }
+        .login-card .form-control { border-radius: 5px; color: #333; }
+        .login-card .form-control::placeholder { color: rgba(0, 0, 0, 0.6); opacity: 1; }
+        .login-card .btn-primary, .btn-success{background: #1565C0; border-color: #1565C0;}
+        .login-card .btn-primary:hover, .btn-success:hover { background: #1255a5; border-color: #1255a5;}
+        
+        #screen-blocker {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0.5);
+            z-index: 9999;
+            cursor: progress;
+        }
+        
+        .main-wrapper { display: flex; height: 100vh; overflow: hidden; }
+        .sidebar {
+            width: 220px;
+            background-color: #1565C0;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .sidebar.collapsed { width: 40px; }
+        
+        .user-profile {
+            padding: 10px 10px 8px 10px;
+            color: rgba(255, 255, 255, 0.85);
+            transition: opacity 0.3s;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .user-profile .user-greeting {
+            font-size: 0.65rem;
+            margin-bottom: 0px;
+        }
+
+        .user-profile .user-name {
+            font-size: 0.65rem;
+            font-weight: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar.collapsed .user-profile {
+            display: none;
+        }
+
+        .logout-area { margin-top: auto; }
+        .sidebar .menu-items { display: flex; flex-direction: column; margin-top: 0; }
+        
+        .sidebar hr { border-top: 1px solid #ffffff33; margin: 5px 0; }
+        
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        
+        .sidebar a:hover { background-color: #1255a5; }
+        
+        .sidebar .icon {
+            font-family: 'Material Symbols Outlined';
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+            margin-left: 5px;
+            margin-right: 10px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .sidebar.collapsed a { justify-content: center; padding: 8px 0; }
+        .sidebar.collapsed a .icon { margin: 0; width: 100%; display: block; text-align: center; }
+
+        .sidebar.collapsed a .text,
+        .sidebar.collapsed .user-info { display: none; }
+        .sidebar.collapsed a .expand-icon { display: none; }
+
+        .submenu {
+            background-color: #1565C0;
+            padding-bottom: 5px;
+        }
+        
+        .submenu a {
+            padding-left: 35px;
+            font-size: 0.9rem;
+            padding-top: 6px;
+            padding-bottom: 6px;
+        }
+        
+        .submenu a:hover {
+            background-color: #1255a5;
+        }
+
+        .logout-area a { padding: 5px 10px; background-color: #dc3545 !important; }
+        .sidebar.collapsed .logout-area a { padding: 5px 0; }
+
+        .content-wrapper { flex: 1; display: flex; flex-direction: column; }
+        .topbar {
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #dee2e6;
+            color: #1565C0;
+            font-size: 1.1rem;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            background: #f5f6fa;
+            overflow-y: auto;
+            color: #333;
+        }
+        .content h3 { color: #1565C0; }
+
+        .footer {
+            height: 40px;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            font-size: 0.85rem;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .login-card #linkEsqueciSenha { color: #1565C0; text-decoration: none; }
+        .login-card #linkEsqueciSenha:hover { text-decoration: underline; }
+        .login-card #login-feedback { color: #dc3545 !important; }
+        
+        .table-responsive {
+            max-height: 40vh;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: .25rem;
+        }
+        .table-crud th, .table-crud td {
+            font-size: 0.85rem;
+            vertical-align: middle;
+            white-space: nowrap;
+            color: #333;
+        }
+        .table-crud .btn-sm {
+            padding: 2px 5px;
+            font-size: 0.75rem;
+        }
+        .btn-acao {
+            padding: 4px 6px;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
+    <div id="main-container"></div>
+    <div id="screen-blocker"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <div id="main-container">
-        </div>
-    
-    <div id="loading-overlay">
-        <div class="spinner-border text-light" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-        <span style="margin-left: 10px;">Carregando...</span>
-    </div>
+    <script>
+        const SUPABASE_URL = 'https://nxgccbvfcxbukhciknoo.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54Z2NjYnZmY3hidWtoY2lrbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyODkzMDAsImV4cCI6MjA3Mzg2NTMwMH0.8iTGv8HzocnJBXB9xT5VUNbwidceKIIbZDuwhGKnahk';
+        const TABLE_NAME = 'perfis';
 
-    <script>
-        // Elementos globais
-        const mainContainer = document.getElementById('main-container');
-        const loadingOverlay = document.getElementById('loading-overlay');
+        // **** CONFIGURAÇÃO CRÍTICA: USANDO SESSIONSTORAGE ****
+        // Garante que a sessão seja apagada ao fechar o navegador/aba.
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                storageKey: 'supabase.auth.session', 
+                storage: window.sessionStorage,       
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        });
+        // *************************************************
 
-        // Funções utilitárias (Mocks para funções de tela)
-        function blockScreen() { loadingOverlay.style.display = 'flex'; }
-        function unblockScreen() { loadingOverlay.style.display = 'none'; }
-        // Função simples para gerar um UUID fictício
-        function generateUUID() { 
-            return 'xxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) { 
-                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8); 
-                return v.toString(16); 
-            }); 
-        }
+        
+        let perfilUsuario = null;
+        let sessaoIDAtual = null;
+        let currentEditingUser = null;
 
+        const mainContainer = document.getElementById("main-container");
+        const screenBlocker = document.getElementById('screen-blocker');
 
-        // --- FUNÇÕES DE LOGIN E SEGURANÇA ---
+        function blockScreen() { screenBlocker.style.display='block'; }
+        function unblockScreen() { screenBlocker.style.display='none'; }
+        
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+        
+        // --- FUNÇÕES DE CRUD (MOCKUP/INTEGRAÇÃO) ---
+        // Funções para gerenciar o CRUD de usuários (necessitam do arquivo crud-usuarios.html)
+        
+        function resetForm(clearOnly = false) {
+            const form = document.getElementById('formCadastroUsuario');
+            if (!form) return;
+            
+            form.reset();
+            currentEditingUser = null;
+            document.getElementById('cadUserId').value = "";
+            document.getElementById('form-title').textContent = "Novo Usuário";
+            document.getElementById('cadastro-feedback').style.display = 'none';
 
-        async function handleLogin() {
-            const email = document.getElementById('idUsu').value;
-            const password = document.getElementById('senhaUsu').value;
-            const feedback = document.getElementById('login-feedback');
-            
-            if(!email || !password){ Swal.fire("Atenção","Preencha E-mail e Senha","warning"); return; }
-            
-            blockScreen();
-            feedback.style.display = 'none';
+            const senhaField = document.getElementById('senha-field');
+            if (senhaField) senhaField.style.display = 'block';
+            document.getElementById('cadSenha').required = true;
+            document.getElementById('cadSenha').placeholder = "Mínimo 8 caracteres";
+            
+            document.getElementById('cadEmail').disabled = false;
+            document.getElementById('cadEmail').placeholder = "Será usado para login";
+            document.getElementById('cadEmail').required = true;
+            
+            document.getElementById('btnSalvarUsuario').innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px; margin-right: 5px; vertical-align: middle;">person_add</span> Cadastrar Usuário';
+            document.getElementById('btnLimparForm').style.display = 'none';
+            
+            if (clearOnly) {
+                Swal.fire('Novo Cadastro', 'Formulário pronto para um novo usuário.', 'info');
+            }
+        }
+        
+        function initializeCrudListeners() {
+            const formCadastro = document.getElementById('formCadastroUsuario');
+            if (formCadastro) {
+                formCadastro.removeEventListener('submit', handleCadastroUsuario);
+                formCadastro.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleCadastroUsuario();
+                });
+            }
+            
+            const cadCpfInput = document.getElementById('cadCPF');
+            if (cadCpfInput) {
+                cadCpfInput.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                });
+            }
+            
+            const btnLimpar = document.getElementById('btnLimparForm');
+            if (btnLimpar) {
+                btnLimpar.addEventListener('click', function() {
+                    resetForm(true);
+                });
+            }
+        }
+        
+        async function loadUsersTable() {
+            const tableBody = document.getElementById('users-table-body');
+            if (!tableBody) return;
+            
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Carregando usuários...</td></tr>';
+            
+            const { data: users, error } = await supabaseClient
+                .from(TABLE_NAME)
+                .select('id, nome_usu, nivel_usu, matricula_usu, cpf_usu')
+                .order('nome_usu', { ascending: true });
 
-            // 1. Tenta autenticar via Supabase Auth
-            const { data: authData, error: loginError } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
-            
-            if (loginError) {
-                unblockScreen();
-                feedback.textContent = "Credenciais inválidas. Verifique seu e-mail e senha.";
-                feedback.style.display = 'block';
-                return;
-            }
-            
-            const userId = authData.user.id;
-            const accessToken = authData.session.access_token;
-            
-            let userSessionId = authData.session.id;
-            if (!userSessionId) {
-                userSessionId = generateUUID();
-                console.warn("⚠️ Não foi possível obter o ID da sessão do Supabase. Usando UUID Fictício:", userSessionId);
-            }
+            if (error) {
+                console.error('Erro ao carregar usuários:', error);
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Falha ao carregar usuários. Verifique as permissões (RLS) da tabela perfis.</td></tr>';
+                return;
+            }
+            
+            if (!users || users.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Nenhum usuário cadastrado.</td></tr>';
+                return;
+            }
 
-            // 2. Cria um cliente autenticado para buscar o perfil (usa o token para respeitar RLS)
-            const authenticatedClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                global: { headers: { Authorization: `Bearer ${accessToken}` } }
-            });
+            let html = '';
+            users.forEach(user => {
+                const isCurrentUser = perfilUsuario && user.id === perfilUsuario.id;
+                const emailDisplay = "---";
 
-            // 3. Busca o perfil na tabela 'perfis'
-            const { data: perfil, error: perfilError } = await authenticatedClient
-                .from(TABLE_NAME).select(`id, bloqueado, cont_erro_login, primeiro_acesso, nome_usu, nivel_usu, sessao_atual`).eq('id', userId).single();
-            
-            if (perfilError || !perfil) {
-                await supabaseClient.auth.signOut();
-                unblockScreen();
-                Swal.fire("Erro de Sistema", "Perfil de usuário não encontrado. Contate o suporte.", "error");
-                return;
-            }
-            
-            if (perfil.bloqueado) {
-                await supabaseClient.auth.signOut();
-                unblockScreen();
-                feedback.textContent = `Acesso bloqueado. Contate o administrador.`;
-                feedback.style.display = 'block';
-                return;
-            }
-            
-            if (perfil.primeiro_acesso) {
-                unblockScreen();
-                await supabaseClient.auth.setSession(authData.session);
-                perfilUsuario = perfil;
-                showChangePasswordForm(perfil);
-                return;
-            }
-            
-            // 4. LÓGICA DE SESSÃO ÚNICA
-            if (perfil.sessao_atual && perfil.sessao_atual !== userSessionId) {
-                unblockScreen();
-                Swal.fire({
-                    title: "⚠️ Aviso de Sessão Ativa",
-                    html: `<p>Detectamos outra sessão ativa (ID: ${perfil.sessao_atual.substring(0, 8)}). Deseja continuar e desconectar a outra sessão?</p>`,
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Sim, Continuar",
-                    cancelButtonText: "Não, Cancelar"
-                }).then(async (result) => {
-                    if (result.isConfirmed) {
-                        blockScreen();
-                        // 5. Atualiza o perfil forçando a nova sessão
-                        const { error: sessionUpdateError } = await authenticatedClient.from(TABLE_NAME).update({
-                            sessao_atual: userSessionId,
-                            cont_erro_login: 0
-                        }).eq('id', perfil.id);
-                        
-                        if (sessionUpdateError) {
-                            await supabaseClient.auth.signOut();
-                            unblockScreen();
-                            Swal.fire("Erro de Permissão (RLS)", `Falha ao registrar a sessão: ${sessionUpdateError.message}. Verifique a RLS.`, "error");
-                            return;
-                        }
+                html += `
+                    <tr>
+                        <td>${user.nome_usu}</td>
+                        <td>${user.nivel_usu}</td>
+                        <td>${user.matricula_usu}</td>
+                        <td>${emailDisplay}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info btn-acao me-1" onclick="handleEditUser('${user.id}')" title="Editar">
+                                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">edit</span>
+                            </button>
+                            ${isCurrentUser
+                                ? `<button class="btn btn-sm btn-danger btn-acao" disabled title="Você não pode excluir a si mesmo">
+                                    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">delete</span>
+                                </button>`
+                                : `<button class="btn btn-sm btn-danger btn-acao" onclick="handleDeleteUser('${user.id}', '${user.nome_usu}')" title="Excluir">
+                                    <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">delete</span>
+                                </button>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+            tableBody.innerHTML = html;
+        }
 
-                        await supabaseClient.auth.setSession(authData.session);
-                        perfilUsuario = perfil;
-                        perfilUsuario.sessao_atual = userSessionId;
-                        unblockScreen();
-                        renderMainPage(perfilUsuario);
+        async function handleEditUser(userId) {
+            blockScreen();
+            resetForm();
+            
+            const { data: user, error } = await supabaseClient
+                .from(TABLE_NAME)
+                .select(`*, auth:auth.users(email)`)
+                .eq('id', userId)
+                .single();
 
-                    } else {
-                        await supabaseClient.auth.signOut();
-                        renderLogin();
-                    }
-                });
-                return;
-            }
-            
-            // 6. REGISTRA A NOVA SESSÃO SE NÃO HOUVER CONFLITO
-            const { error: sessionUpdateError } = await authenticatedClient
-                .from(TABLE_NAME)
-                .update({
-                    cont_erro_login: 0,
-                    sessao_atual: userSessionId
-                })
-                .eq('id', perfil.id);
-            
-            if (sessionUpdateError) {
-                await supabaseClient.auth.signOut();
-                unblockScreen();
-                Swal.fire("Erro de Permissão (RLS)", `Falha ao registrar a sessão: ${sessionUpdateError.message}. Verifique a RLS.`, "error");
-                return;
-            }
+            unblockScreen();
+            
+            if (error || !user) {
+                Swal.fire('Erro', 'Não foi possível carregar os dados do usuário para edição.', 'error');
+                return;
+            }
+            
+            currentEditingUser = userId;
+            document.getElementById('cadUserId').value = userId;
+            document.getElementById('form-title').textContent = `Editar Usuário: ${user.nome_usu}`;
+            
+            document.getElementById('cadNome').value = user.nome_usu;
+            document.getElementById('cadNivel').value = user.nivel_usu;
+            document.getElementById('cadEmpresa').value = user.empresa_usu;
+            document.getElementById('cadMatricula').value = user.matricula_usu;
+            document.getElementById('cadCPF').value = user.cpf_usu;
+            
+            const userEmail = user.auth && user.auth.length > 0 ? user.auth[0].email : "E-mail indisponível";
+            
+            document.getElementById('cadEmail').value = userEmail;
+            document.getElementById('cadEmail').disabled = true;
+            document.getElementById('cadEmail').required = false;
+            
+            const senhaField = document.getElementById('senha-field');
+            if (senhaField) senhaField.style.display = 'none';
+            document.getElementById('cadSenha').required = false;
 
-            await supabaseClient.auth.setSession(authData.session);
+            document.getElementById('btnSalvarUsuario').innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px; margin-right: 5px; vertical-align: middle;">update</span> Salvar Alterações';
+            document.getElementById('btnLimparForm').style.display = 'inline-block';
 
-            perfilUsuario = perfil;
-            perfilUsuario.sessao_atual = userSessionId;
+            Swal.fire('Modo Edição', `Carregando dados de ${user.nome_usu}. E-mail e Senha não podem ser alterados nesta tela.`, 'info');
+        }
 
-            unblockScreen();
-            renderMainPage(perfilUsuario);
-        }
+        async function handleDeleteUser(userId, userName) {
+            const result = await Swal.fire({
+                title: `Tem certeza que deseja excluir ${userName}?`,
+                text: "Esta ação é irreversível e removerá o perfil e o acesso de login.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sim, Excluir!',
+                cancelButtonText: 'Cancelar'
+            });
 
-        // Função de Logout com confirmação
-        async function handleLogout(showPopup = true) {
-            
-            if (showPopup) {
-                const result = await Swal.fire({
-                    title: "Deseja realmente sair?",
-                    text: "Sua sessão será encerrada. Você precisará fazer login novamente.",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#dc3545',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Sim, Sair',
-                    cancelButtonText: 'Cancelar'
-                });
+            if (result.isConfirmed) {
+                blockScreen();
+                
+                const { error: authError } = await supabaseClient.auth.admin.deleteUser(userId);
+                
+                const { error: perfilError } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .delete()
+                    .eq('id', userId);
+                
+                unblockScreen();
+                
+                if (perfilError) {
+                    Swal.fire('Erro RLS/Exclusão', `Falha ao excluir o perfil: ${perfilError.message}.`, 'error');
+                    return;
+                }
 
-                if (!result.isConfirmed) {
-                    return; 
-                }
-            }
-            
-            blockScreen();
-            if (perfilUsuario) {
-                // Remove a sessão do banco de dados (null no campo sessao_atual)
-                await supabaseClient.from(TABLE_NAME).update({ sessao_atual: null }).eq('id', perfilUsuario.id);
-            }
-            
-            await supabaseClient.auth.signOut();
-            perfilUsuario = null;
+                if (authError && authError.message.includes('not allowed')) {
+                    Swal.fire('Aviso de Segurança', `Perfil excluído. Mas a conta de Auth não pôde ser excluída (permissão negada).`, 'warning');
+                } else if (authError) {
+                    Swal.fire('Aviso', `Perfil excluído. Erro no Auth: ${authError.message}`, 'warning');
+                } else {
+                    Swal.fire('Excluído!', `O usuário ${userName} foi removido PERMANENTEMENTE.`, 'success');
+                }
+                
+                loadUsersTable();
+            }
+        }
 
-            unblockScreen();
-            
-            if (showPopup) {
-                Swal.fire({ title: "Logout", text: "Sessão encerrada com sucesso.", icon: "info", allowOutsideClick: false, confirmButtonText: "OK" }).then(() => { renderLogin(); });
-            } else {
-                renderLogin();
-            }
-        }
+        async function handleCadastroUsuario() {
+            const userId = document.getElementById('cadUserId').value;
+            const isEditing = !!userId;
+            
+            const matricula = document.getElementById('cadMatricula').value.trim();
+            const empresa = document.getElementById('cadEmpresa').value.trim();
+            const cpf = document.getElementById('cadCPF').value.trim();
+            const nome = document.getElementById('cadNome').value.trim();
+            const nivel = document.getElementById('cadNivel').value;
+            const email = isEditing ? null : document.getElementById('cadEmail').value.trim();
+            const senha = isEditing ? null : document.getElementById('cadSenha').value;
+            
+            const feedback = document.getElementById('cadastro-feedback');
+            const nomeUsuarioLogado = perfilUsuario ? perfilUsuario.nome_usu : 'SYSTEM';
+            const dataHoraAtual = new Date().toISOString();
 
-        async function handlePasswordReset() {
-            const email = document.getElementById("idUsu").value.trim();
-            if (!email) { Swal.fire("Atenção", "Preencha o E-mail para solicitar a nova senha", "warning"); return; }
-            blockScreen();
-            // Redireciona para a página atual após o reset
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
-            unblockScreen();
-            if (error) { Swal.fire('Erro ao solicitar reset', error.message, 'error'); } else { Swal.fire('Sucesso', 'Instruções para reset de senha enviadas para o seu e-mail.', 'success'); }
-        }
+            feedback.style.display = 'none';
 
-        function validarForcaSenha(senha){
-            if(senha.length < 8) return "A senha deve ter no mínimo 8 caracteres";
-            if(!/[A-Z]/.test(senha)) return "A senha deve conter pelo menos uma letra maiúscula";
-            if(!/[!@#$%^&*(),.?":{}|<>]/.test(senha)) return "A senha deve conter pelo menos um caractere especial";
-            return null;
-        }
+            if (!nome || !nivel || !matricula || !empresa || cpf.length !== 11) {
+                feedback.textContent = "Preencha Nome, Nível, Matrícula, Empresa, e CPF (11 dígitos).";
+                feedback.style.display = 'block';
+                return;
+            }
+            if (!isEditing && (!email || !senha || senha.length < 8)) {
+                feedback.textContent = "Para novo cadastro, E-mail é obrigatório e Senha deve ter no mínimo 8 caracteres.";
+                feedback.style.display = 'block';
+                return;
+            }
 
-        // Salva a nova senha no primeiro acesso (Troca de senha obrigatória)
-        async function salvarNovaSenha() {
-            const novaSenha = document.getElementById('novaSenha').value;
-            const confSenha = document.getElementById('confSenha').value;
+            blockScreen();
 
-            if(!novaSenha || novaSenha!==confSenha){ Swal.fire('Erro','As senhas não conferem','error'); return; }
-            const msgErro = validarForcaSenha(novaSenha);
-            if(msgErro){ Swal.fire('Erro', msgErro, 'error'); return; }
+            if (isEditing) {
+                const { error: perfilError } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .update({
+                        matricula_usu: matricula, empresa_usu: empresa, cpf_usu: cpf,
+                        nome_usu: nome, nivel_usu: nivel,
+                        data_alt: dataHoraAtual, usu_alt: nomeUsuarioLogado,
+                    })
+                    .eq('id', userId);
 
-            blockScreen();
+                unblockScreen();
+                if (perfilError) {
+                    Swal.fire('Erro na Edição', `Falha ao atualizar o perfil: ${perfilError.message}.`, 'error');
+                    return;
+                }
+                Swal.fire('Sucesso!', `O usuário **${nome}** foi atualizado.`, 'success');
+                resetForm();
+                loadUsersTable();
+                
+            } else {
+                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: senha,
+                });
+                
+                if (authError) {
+                    unblockScreen();
+                    const msg = authError.message.includes('already registered') ? 'Este e-mail já está cadastrado.' : authError.message;
+                    Swal.fire('Erro no Cadastro', msg, 'error');
+                    return;
+                }
 
-            const { error: authError } = await supabaseClient.auth.updateUser({ password: novaSenha });
-            if (authError) { unblockScreen(); Swal.fire('Erro','Falha ao atualizar senha no Auth: ' + authError.message,'error'); return; }
+                const newUserId = authData.user.id;
+                
+                const { error: perfilError } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .insert({
+                        id: newUserId,
+                        matricula_usu: matricula, empresa_usu: empresa, cpf_usu: cpf,
+                        nome_usu: nome, nivel_usu: nivel,
+                        data_alt: dataHoraAtual, usu_alt: nomeUsuarioLogado,
+                        primeiro_acesso: true, bloqueado: false, cont_erro_login: 0, sessao_atual: null,
+                    });
 
-            // Marca 'primeiro_acesso' como false no perfil
-            const { error: perfilError } = await supabaseClient.from(TABLE_NAME).update({ primeiro_acesso: false }).eq('id', perfilUsuario.id);
-            unblockScreen();
-            
-            if (perfilError) {
-                Swal.fire('Atenção', 'Senha atualizada, mas falha ao marcar o primeiro acesso no perfil.','warning').then(() => { handleLogout(true); });
-            } else {
-                await Swal.fire('Sucesso','Senha atualizada! Faça login com a nova senha.','success');
-                handleLogout(false);
-            }
-        }
+                unblockScreen();
+                if (perfilError) {
+                    await supabaseClient.auth.admin.deleteUser(newUserId);
+                    Swal.fire({
+                        title: 'Aviso Crítico',
+                        html: `Usuário criado no Auth, mas **falha ao criar o perfil**: ${perfilError.message}. Contate o suporte para limpeza do registro.`,
+                        icon: 'warning'
+                    });
+                    return;
+                }
 
-        // Lógica de atualização de senha após o link de recuperação (com token)
-        async function handlePasswordUpdate() {
-            const novaSenha = document.getElementById('novaSenha').value;
-            const confSenha = document.getElementById('confSenha').value;
-            const btnSalvar = document.getElementById('btnSalvarSenha');
+                Swal.fire({
+                    title: 'Sucesso!',
+                    html: `O usuário **${nome}** foi cadastrado com sucesso e deve definir a senha no primeiro acesso.`,
+                    icon: 'success'
+                });
+                resetForm();
+                loadUsersTable();
+            }
+        }
+               // --- FUNÇÕES DE LOGIN E SEGURANÇA ---
+        
+        async function handleLogin() {
+            const email = document.getElementById('idUsu').value;
+            const password = document.getElementById('senhaUsu').value;
+            const feedback = document.getElementById('login-feedback');
+            
+            if(!email || !password){ Swal.fire("Atenção","Preencha E-mail e Senha","warning"); return; }
+            
+            blockScreen();
+            feedback.style.display = 'none';
 
-            if(!novaSenha || novaSenha!==confSenha){ Swal.fire('Erro','As senhas não conferem','error'); return; }
-            const msgErro = validarForcaSenha(novaSenha);
-            if(msgErro){ Swal.fire('Erro', msgErro, 'error'); return; }
+            const { data: authData, error: loginError } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
+            
+            if (loginError) {
+                unblockScreen();
+                feedback.textContent = "Credenciais inválidas. Verifique seu e-mail e senha.";
+                feedback.style.display = 'block';
+                return;
+            }
+            
+            const userId = authData.user.id;
+            const accessToken = authData.session.access_token;
+            
+            let userSessionId = authData.session.id;
+            if (!userSessionId) {
+                userSessionId = generateUUID();
+                console.warn("⚠️ Não foi possível obter o ID da sessão do Supabase. Usando UUID Fictício:", userSessionId);
+            }
 
-            blockScreen();
-            btnSalvar.disabled = true;
+            const authenticatedClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                global: { headers: { Authorization: `Bearer ${accessToken}` } }
+            });
 
-            const { error } = await supabaseClient.auth.updateUser({ password: novaSenha });
-            
-            unblockScreen();
-            btnSalvar.disabled = false;
+            const { data: perfil, error: perfilError } = await authenticatedClient
+                .from(TABLE_NAME).select(`id, bloqueado, cont_erro_login, primeiro_acesso, nome_usu, nivel_usu, sessao_atual`).eq('id', userId).single();
+            
+            if (perfilError || !perfil) {
+                await supabaseClient.auth.signOut();
+                unblockScreen();
+                Swal.fire("Erro de Sistema", "Perfil de usuário não encontrado. Contate o suporte.", "error");
+                return;
+            }
+            
+            if (perfil.bloqueado) {
+                await supabaseClient.auth.signOut();
+                unblockScreen();
+                feedback.textContent = `Acesso bloqueado. Contate o administrador.`;
+                feedback.style.display = 'block';
+                return;
+            }
+            
+            if (perfil.primeiro_acesso) {
+                unblockScreen();
+                await supabaseClient.auth.setSession(authData.session);
+                perfilUsuario = perfil;
+                showChangePasswordForm(perfil);
+                return;
+            }
+            
+            // LÓGICA DE SESSÃO ÚNICA
+            if (perfil.sessao_atual && perfil.sessao_atual !== userSessionId) {
+                unblockScreen();
+                Swal.fire({
+                    title: "⚠️ Aviso de Sessão Ativa",
+                    html: `<p>Detectamos outra sessão ativa (ID: ${perfil.sessao_atual.substring(0, 8)}). Deseja continuar e desconectar a outra sessão?</p>`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sim, Continuar",
+                    cancelButtonText: "Não, Cancelar"
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        blockScreen();
+                        const { error: sessionUpdateError } = await authenticatedClient.from(TABLE_NAME).update({
+                            sessao_atual: userSessionId,
+                            cont_erro_login: 0
+                        }).eq('id', perfil.id);
+                        
+                        if (sessionUpdateError) {
+                            await supabaseClient.auth.signOut();
+                            unblockScreen();
+                            Swal.fire("Erro de Permissão (RLS)", `Falha ao registrar a sessão: ${sessionUpdateError.message}. Verifique a RLS.`, "error");
+                            return;
+                        }
 
-            if (error) {
-                Swal.fire('Erro ao Atualizar', 'Falha ao atualizar a senha: ' + error.message, 'error');
-            } else {
-                await Swal.fire('Sucesso!', 'Sua senha foi atualizada. Faça login.', 'success');
-                
-                window.history.replaceState({}, document.title, window.location.pathname);
-                renderLogin();
-            }
-        }
+                        await supabaseClient.auth.setSession(authData.session);
+                        perfilUsuario = perfil;
+                        perfilUsuario.sessao_atual = userSessionId;
+                        unblockScreen();
+                        renderMainPage(perfilUsuario);
 
-        // --- FUNÇÕES DE RENDERIZAÇÃO DE TELA ---
+                    } else {
+                        await supabaseClient.auth.signOut();
+                        renderLogin();
+                    }
+                });
+                return;
+            }
+            
+            // REGISTRA A NOVA SESSÃO SE NÃO HOUVER CONFLITO
+            const { error: sessionUpdateError } = await authenticatedClient
+                .from(TABLE_NAME)
+                .update({
+                    cont_erro_login: 0,
+                    sessao_atual: userSessionId
+                })
+                .eq('id', perfil.id);
+            
+            if (sessionUpdateError) {
+                await supabaseClient.auth.signOut();
+                unblockScreen();
+                Swal.fire("Erro de Permissão (RLS)", `Falha ao registrar a sessão: ${sessionUpdateError.message}. Verifique a RLS.`, "error");
+                return;
+            }
 
-        function renderLogin() {
-            mainContainer.innerHTML = `
-                <div class="login-container" id="login-container">
-                    <div class="login-card">
-                        <h4>SIGMA</h4>
-                        <div class="subtitulo">Gestão Inteligente</div>
-                        
-                        <div class="mb-3 mt-3">
-                            <label for="idUsu" class="form-label">E-mail:</label>
-                            <input type="email" id="idUsu" class="form-control" placeholder="Digite seu E-mail" required>
-                        </div>
+            await supabaseClient.auth.setSession(authData.session);
 
-                        <div class="mb-3" id="senhaUsuContainer">
-                            <label for="senhaUsu" class="form-label">Senha:</label>
-                            <input type="password" id="senhaUsu" class="form-control" placeholder="Digite sua senha" required>
-                        </div>
+            perfilUsuario = perfil;
+            perfilUsuario.sessao_atual = userSessionId;
 
-                        <div class="mb-3" id="novaSenhaDiv" style="display:none;">
-                            <label for="novaSenha" class="form-label">Nova Senha:</label>
-                            <input type="password" id="novaSenha" class="form-control" placeholder="Mínimo 8 caracteres, com maiúscula e especial">
-                        </div>
+            unblockScreen();
+            renderMainPage(perfilUsuario);
+        }
 
-                        <div class="mb-3" id="confSenhaDiv" style="display:none;">
-                            <label for="confSenha" class="form-label">Confirme a Senha:</label>
-                            <input type="password" id="confSenha" class="form-control" placeholder="Confirme a nova senha">
-                        </div>
-                        <button class="btn btn-primary w-100" id="btnLogin" onclick="handleLogin()">Entrar</button>
-                        <button class="btn btn-success w-100" id="btnSalvarSenha" style="display:none;" onclick="salvarNovaSenha()">Salvar Senha</button>
+        // Função de Logout com confirmação
+        async function handleLogout(showPopup = true) {
+            
+            if (showPopup) {
+                const result = await Swal.fire({
+                    title: "Deseja realmente sair?",
+                    text: "Sua sessão será encerrada. Você precisará fazer login novamente.",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sim, Sair',
+                    cancelButtonText: 'Cancelar'
+                });
 
-                        <p id="login-feedback" class="text-danger text-center mt-2" style="display:none;"></p>
+                // Se o usuário clicar em 'Cancelar', a função para aqui.
+                if (!result.isConfirmed) {
+                    return; 
+                }
+            }
+            
+            // Procede com o encerramento da sessão
+            blockScreen();
+            if (perfilUsuario) {
+                // Remove a sessão do banco de dados
+                await supabaseClient.from(TABLE_NAME).update({ sessao_atual: null }).eq('id', perfilUsuario.id);
+            }
+            // Invalida a sessão no navegador (sessionStorage)
+            await supabaseClient.auth.signOut();
+            sessaoIDAtual = null;
+            perfilUsuario = null;
 
-                        <div class="text-center mt-2">
-                            <a href="javascript:void(0);" id="linkEsqueciSenha" onclick="handlePasswordReset()">Esqueci minha senha</a>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // Função para alterar senha no primeiro acesso
-        function showChangePasswordForm(perfil) {
-            document.getElementById('senhaUsuContainer').style.display='none';
-            document.getElementById('novaSenhaDiv').style.display='block';
-            document.getElementById('confSenhaDiv').style.display='block';
-            document.getElementById('btnSalvarSenha').style.display='block';
-            document.getElementById('btnLogin').style.display='none';
-            document.getElementById('linkEsqueciSenha').style.display='none';
-            document.getElementById('login-feedback').textContent = `Defina uma nova senha.`;
-            document.getElementById('login-feedback').style.display = 'block';
-            document.getElementById('btnSalvarSenha').onclick = salvarNovaSenha; 
-            document.getElementById('idUsu').disabled = true; 
-        }
+            unblockScreen();
+            
+            if (showPopup) {
+                // Mensagem de sucesso após a saída confirmada
+                Swal.fire({ title: "Logout", text: "Sessão encerrada com sucesso.", icon: "info", allowOutsideClick: false, confirmButtonText: "OK" }).then(() => { renderLogin(); });
+            } else {
+                // Fluxo silencioso (após troca de senha)
+                renderLogin();
+            }
+        }
+        
+        async function handlePasswordReset() {
+            const email = document.getElementById("idUsu").value.trim();
+            if (!email) { Swal.fire("Atenção", "Preencha o E-mail para solicitar a nova senha", "warning"); return; }
+            blockScreen();
+            // Redireciona o usuário de volta para o index.html
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+            unblockScreen();
+            if (error) { Swal.fire('Erro ao solicitar reset', error.message, 'error'); } else { Swal.fire('Sucesso', 'Instruções para reset de senha enviadas para o seu e-mail.', 'success'); }
+        }
+        
+        function validarForcaSenha(senha){
+            if(senha.length < 8) return "A senha deve ter no mínimo 8 caracteres";
+            if(!/[A-Z]/.test(senha)) return "A senha deve conter pelo menos uma letra maiúscula";
+            if(!/[!@#$%^&*(),.?":{}|<>]/.test(senha)) return "A senha deve conter pelo menos um caractere especial";
+            return null;
+        }
 
-        // Função para renderizar formulário de alteração de senha após clique no e-mail (Token)
-        function renderChangePasswordForm(message = "Defina sua nova senha.", emailParaPreencher = "") {
-            renderLogin(); 
-            document.getElementById('senhaUsuContainer').style.display='none';
-            document.getElementById('novaSenhaDiv').style.display='block';
-            document.getElementById('confSenhaDiv').style.display='block';
-            
-            const emailInput = document.getElementById('idUsu');
-            emailInput.value = emailParaPreencher;
-            emailInput.disabled = true; 
+        // Salva a nova senha no primeiro acesso (Troca de senha obrigatória)
+        async function salvarNovaSenha() {
+            const novaSenha = document.getElementById('novaSenha').value;
+            const confSenha = document.getElementById('confSenha').value;
 
-            document.getElementById('btnLogin').style.display='none';
-            const btnSalvar = document.getElementById('btnSalvarSenha');
-            btnSalvar.style.display='block';
-            btnSalvar.onclick = handlePasswordUpdate; 
+            if(!novaSenha || novaSenha!==confSenha){ Swal.fire('Erro','As senhas não conferem','error'); return; }
+            const msgErro = validarForcaSenha(novaSenha);
+            if(msgErro){ Swal.fire('Erro', msgErro, 'error'); return; }
 
-            document.getElementById('linkEsqueciSenha').style.display='none';
-            document.getElementById('login-feedback').textContent = message;
-            document.getElementById('login-feedback').style.display = 'block';
-            document.getElementById('login-feedback').classList.remove('text-danger');
-            document.getElementById('login-feedback').classList.add('text-success');
-        }
+            blockScreen();
 
-        function toggleSidebar(){
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('collapsed');
-            if (sidebar.classList.contains('collapsed')) {
-                document.querySelectorAll('.submenu').forEach(sm => sm.style.display = "none");
-            }
-        }
+            const { error: authError } = await supabaseClient.auth.updateUser({ password: novaSenha });
+            if (authError) { unblockScreen(); Swal.fire('Erro','Falha ao atualizar senha no Auth: ' + authError.message,'error'); return; }
 
-        function handleMenuClick(submenuId) {
-            const sidebar = document.getElementById('sidebar');
-            const submenu = document.getElementById(submenuId);
+            const { error: perfilError } = await supabaseClient.from(TABLE_NAME).update({ primeiro_acesso: false }).eq('id', perfilUsuario.id);
+            unblockScreen();
+            
+            if (perfilError) {
+                Swal.fire('Atenção', 'Senha atualizada, mas falha ao marcar o primeiro acesso no perfil.','warning').then(() => { handleLogout(true); });
+            } else {
+                // Vai direto para o login sem mensagem intermediária
+                await Swal.fire('Sucesso','Senha atualizada! Faça login com a nova senha.','success');
+                handleLogout(false);
+            }
+        }
+        
+        // Lógica de atualização de senha após o link de recuperação (com token)
+        async function handlePasswordUpdate() {
+            const novaSenha = document.getElementById('novaSenha').value;
+            const confSenha = document.getElementById('confSenha').value;
+            const btnSalvar = document.getElementById('btnSalvarSenha');
 
-            if (sidebar.classList.contains('collapsed')) {
-                sidebar.classList.remove('collapsed');
-                submenu.style.display = "block";
-            } else {
-                submenu.style.display = (submenu.style.display === "none") ? "block" : "none";
-            }
-        }
+            if(!novaSenha || novaSenha!==confSenha){ Swal.fire('Erro','As senhas não conferem','error'); return; }
+            const msgErro = validarForcaSenha(novaSenha);
+            if(msgErro){ Swal.fire('Erro', msgErro, 'error'); return; }
 
-        // Função de carregamento de página simplificada
-        async function loadPage(pageName) {
-            const content = document.getElementById('page-content');
-            const topbarTitle = document.getElementById('topbar-title');
-            
-            if (topbarTitle) { topbarTitle.innerHTML = `${pageName}`; }
+            blockScreen();
+            btnSalvar.disabled = true;
 
-            blockScreen();
+            const { error } = await supabaseClient.auth.updateUser({ password: novaSenha });
+            
+            unblockScreen();
+            btnSalvar.disabled = false;
 
-            if (pageName === 'Dashboard') {
-                content.innerHTML = `<h3>Dashboard</h3><div class="alert alert-info">Bem-vindo(a), **${perfilUsuario.nome_usu}**! Clique nos links do menu lateral para navegar!</div>`;
-            } else {
-                content.innerHTML = `<h3>${pageName}</h3><div class="alert alert-warning">Este módulo está em desenvolvimento.</div>`;
-            }
+            if (error) {
+                Swal.fire('Erro ao Atualizar', 'Falha ao atualizar a senha: ' + error.message, 'error');
+            } else {
+                // Vai direto para o login sem mensagem intermediária
+                await Swal.fire('Sucesso!', 'Sua senha foi atualizada. Faça login.', 'success');
+                
+                window.history.replaceState({}, document.title, window.location.pathname);
+                renderLogin();
+            }
+        }
 
-            unblockScreen();
-        }
+        // --- FUNÇÕES DE RENDERIZAÇÃO DE TELA ---
 
-        function renderMainPage(perfil) {
-            const sessaoIdCurto = perfil.sessao_atual ? perfil.sessao_atual.substring(0, 8) : 'N/A';
-            
-            mainContainer.innerHTML = `
-                <div class="main-wrapper" id="main-wrapper">
-                    <div class="sidebar collapsed" id="sidebar">
-                        <div class="menu-items">
-                            <a href="javascript:void(0);" class="toggle-btn" onclick="toggleSidebar()">
-                                <span class="icon">menu</span>
-                                <span class="text">SIGMA</span>
-                            </a>
-                            <hr>
+        function renderLogin() {
+            mainContainer.innerHTML = `
+                <div class="login-container" id="login-container">
+                    <div class="login-card">
+                        <h4>SIGMA</h4>
+                        <div class="subtitulo">Gestão Inteligente</div>
+                        
+                        <div class="mb-3 mt-3">
+                            <label for="idUsu" class="form-label">E-mail:</label>
+                            <input type="email" id="idUsu" class="form-control" placeholder="Digite seu E-mail" required>
+                        </div>
 
-                            <div class="user-profile" id="user-profile-info">
-                                <div class="user-greeting">Bem-vindo(a),</div>
-                                <div class="user-name">${perfil.nome_usu || 'Usuário'}</div>
-                            </div>
-                            <hr>
+                        <div class="mb-3" id="senhaUsuContainer">
+                            <label for="senhaUsu" class="form-label">Senha:</label>
+                            <input type="password" id="senhaUsu" class="form-control" placeholder="Digite sua senha" required>
+                        </div>
 
-                            <a href="#" onclick="loadPage('Dashboard')"><span class="icon">home</span><span class="text">Dashboard</span></a>
+                        <div class="mb-3" id="novaSenhaDiv" style="display:none;">
+                            <label for="novaSenha" class="form-label">Nova Senha:</label>
+                            <input type="password" id="novaSenha" class="form-control" placeholder="Mínimo 8 caracteres, com maiúscula e especial">
+                        </div>
 
-                            <div class="menu-item">
-                                <a href="#" onclick="handleMenuClick('cadastrosSub')">
-                                    <span class="icon">engineering</span>
-                                    <span class="text">Cadastros</span>
-                                    <span class="icon expand-icon" style="margin-left:auto;">expand_more</span>
-                                </a>
-                                <div class="submenu" id="cadastrosSub" style="display:none;">
-                                    <a href="#" onclick="loadPage('Obras')"><span class="icon">format_list_bulleted</span><span class="text">Obras</span></a>
-                                    <a href="#" onclick="loadPage('Departamentos')"><span class="icon">groups</span><span class="text">Departamentos</span></a>
-                                </div>
-                            </div>
-                            
-                            <a href="#" onclick="loadPage('Relatórios')"><span class="icon">bar_chart</span><span class="text">Relatórios</span></a>
-                        </div>
+                        <div class="mb-3" id="confSenhaDiv" style="display:none;">
+                            <label for="confSenha" class="form-label">Confirme a Senha:</label>
+                            <input type="password" id="confSenha" class="form-control" placeholder="Confirme a nova senha">
+                        </div>
+                        <button class="btn btn-primary w-100" id="btnLogin" onclick="handleLogin()">Entrar</button>
+                        <button class="btn btn-success w-100" id="btnSalvarSenha" style="display:none;" onclick="salvarNovaSenha()">Salvar Senha</button>
 
-                        <div class="logout-area">
-                            <a href="#" onclick="handleLogout()">
-                            <span class="icon">logout</span><span class="text">Sair</span>
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <div class="content-wrapper">
-                        <div class="topbar" id="topbar-title">Menu Principal</div>
-                        <div class="content" id="page-content">
-                        </div>
-                        <div class="footer">
-                            <span>SIGMA - Sistema Inteligente de Gestão &copy; 2025</span>
-                            <span id="nivel-usuario">Perfil: ${perfil.nivel_usu || 'Padrão'} | Sessão ID: ${sessaoIdCurto}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            loadPage('Dashboard');
-        }
+                        <p id="login-feedback" class="text-danger text-center mt-2" style="display:none;"></p>
 
-        // --- LÓGICA DE INICIALIZAÇÃO E CHECAGEM DE URL ---
+                        <div class="text-center mt-2">
+                            <a href="javascript:void(0);" id="linkEsqueciSenha" onclick="handlePasswordReset()">Esqueci minha senha</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Função para alterar senha no primeiro acesso
+        function showChangePasswordForm(perfil) {
+            // Esconde o container Senha/Label
+            document.getElementById('senhaUsuContainer').style.display='none';
+            
+            document.getElementById('novaSenhaDiv').style.display='block';
+            document.getElementById('confSenhaDiv').style.display='block';
+            document.getElementById('btnSalvarSenha').style.display='block';
+            document.getElementById('btnLogin').style.display='none';
+            document.getElementById('linkEsqueciSenha').style.display='none';
+            document.getElementById('login-feedback').textContent = `Defina uma nova senha.`;
+            document.getElementById('login-feedback').style.display = 'block';
+            document.getElementById('btnSalvarSenha').onclick = salvarNovaSenha; 
+            
+            // Bloqueia o campo e-mail
+            document.getElementById('idUsu').disabled = true; 
+        }
 
-        async function checkURLForPasswordReset() {
-            const hash = window.location.hash;
-            const urlParams = new URLSearchParams(hash.substring(1));
-            const type = urlParams.get('type');
-            const accessToken = urlParams.get('access_token');
-            
-            if (type === 'recovery' && accessToken) {
-                blockScreen();
-                
-                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
-                
-                if (sessionError || !session) {
-                    unblockScreen();
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    Swal.fire('Erro de Token', 'O link de recuperação expirou ou é inválido.', 'error');
-                    renderLogin();
-                    return true; 
-                }
-                
-                const userEmail = session.user.email;
+        // Função para renderizar formulário de alteração de senha após clique no e-mail (Token)
+        function renderChangePasswordForm(message = "Defina sua nova senha.", emailParaPreencher = "") {
+            renderLogin(); // Renderiza o HTML base do login
+            
+            // Esconde o container Senha/Label
+            document.getElementById('senhaUsuContainer').style.display='none';
+            
+            // Exibe os campos de nova senha
+            document.getElementById('novaSenhaDiv').style.display='block';
+            document.getElementById('confSenhaDiv').style.display='block';
+            
+            // Preenche e desabilita o campo de E-mail
+            const emailInput = document.getElementById('idUsu');
+            emailInput.value = emailParaPreencher;
+            emailInput.disabled = true; // Garante o campo bloqueado
 
-                unblockScreen();
-                
-                renderChangePasswordForm("Defina uma nova senha.", userEmail);
-                return true; 
-            }
-            return false; 
-        }
+            // Altera o botão de login para o botão de salvar a nova senha
+            document.getElementById('btnLogin').style.display='none';
+            const btnSalvar = document.getElementById('btnSalvarSenha');
+            btnSalvar.style.display='block';
+            btnSalvar.onclick = handlePasswordUpdate; // Conecta a função de recuperação de senha
 
-        async function initApp() {
-            blockScreen();
-            
-            // 1. Prioridade: Redefinição de Senha
-            const isResetFlow = await checkURLForPasswordReset();
-            if (isResetFlow) {
-                unblockScreen();
-                return;
-            }
+            document.getElementById('linkEsqueciSenha').style.display='none';
+            document.getElementById('login-feedback').textContent = message;
+            document.getElementById('login-feedback').style.display = 'block';
+            document.getElementById('login-feedback').classList.remove('text-danger');
+            document.getElementById('login-feedback').classList.add('text-success');
+        }
 
-            // 2. Segunda Prioridade: Sessão Ativa
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            
-            if (session) {
-                const userId = session.user.id;
-                const { data: perfil, error: perfilError } = await supabaseClient
-                    .from(TABLE_NAME)
-                    .select(`id, nome_usu, nivel_usu, sessao_atual`)
-                    .eq('id', userId)
-                    .single();
+        function toggleSidebar(){
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            if (sidebar.classList.contains('collapsed')) {
+                document.querySelectorAll('.submenu').forEach(sm => sm.style.display = "none");
+            }
+        }
 
-                if (perfil && !perfilError) {
-                    perfilUsuario = perfil;
-                    renderMainPage(perfilUsuario);
-                    unblockScreen();
-                    return;
-                } else {
-                    await supabaseClient.auth.signOut();
-                }
-            } else {
-                await supabaseClient.auth.signOut();
-            }
-            
-            // 3. Padrão: Tela de Login
-            renderLogin();
-            unblockScreen();
-        }
+        function handleMenuClick(submenuId) {
+            const sidebar = document.getElementById('sidebar');
+            const submenu = document.getElementById(submenuId);
 
-        // INICIA O APLICATIVO
-        initApp();
-    </script>
+            if (sidebar.classList.contains('collapsed')) {
+                sidebar.classList.remove('collapsed');
+                submenu.style.display = "block";
+            } else {
+                submenu.style.display = (submenu.style.display === "none") ? "block" : "none";
+            }
+        }
+
+        async function loadPage(pageName) {
+            const content = document.getElementById('page-content');
+            const topbarTitle = document.getElementById('topbar-title');
+            
+            if (topbarTitle) { topbarTitle.innerHTML = `${pageName}`; }
+
+            blockScreen();
+
+            if (pageName === 'Usuários') {
+                try {
+                    // BUSCA O HTML EXTERNO (MÓDULO DE CRUD)
+                    const response = await fetch('crud-usuarios.html'); 
+                    if (!response.ok) {
+                        throw new Error(`Erro ao carregar o arquivo: ${response.statusText}`);
+                    }
+                    const pageContentHTML = await response.text();
+                    content.innerHTML = pageContentHTML;
+                    
+                    // Inicializa a lógica do CRUD
+                    initializeCrudListeners();
+                    resetForm();
+                    await loadUsersTable();
+
+                } catch (error) {
+                    content.innerHTML = `<h3>Erro de Carregamento</h3><div class="alert alert-danger">Não foi possível carregar o conteúdo da página de Usuários: **${error.message}**. Verifique se o arquivo \`crud-usuarios.html\` existe.</div>`;
+                    console.error("Erro ao carregar página de usuários:", error);
+                }
+
+            } else if (pageName === 'Dashboard') {
+                content.innerHTML = `<h3>Dashboard</h3><div class="alert alert-info">Bem-vindo(a), **${perfilUsuario.nome_usu}**! Clique nos links do menu lateral para navegar!</div>`;
+            } else {
+                content.innerHTML = `<h3>${pageName}</h3><div class="alert alert-warning">Este módulo está em desenvolvimento.</div>`;
+            }
+
+            unblockScreen();
+        }
+        
+        function renderMainPage(perfil) {
+            const sessaoIdCurto = perfil.sessao_atual ? perfil.sessao_atual.substring(0, 8) : 'N/A';
+            
+            mainContainer.innerHTML = `
+                <div class="main-wrapper" id="main-wrapper">
+                    <div class="sidebar collapsed" id="sidebar">
+                        <div class="menu-items">
+                            <a href="javascript:void(0);" class="toggle-btn" onclick="toggleSidebar()">
+                                <span class="icon">menu</span>
+                                <span class="text">SIGMA</span>
+                            </a>
+                            <hr>
+
+                            <div class="user-profile" id="user-profile-info">
+                                <div class="user-greeting">Bem-vindo(a),</div>
+                                <div class="user-name">${perfil.nome_usu || 'Usuário'}</div>
+                            </div>
+                            <hr>
+
+                            <a href="#" onclick="loadPage('Dashboard')"><span class="icon">home</span><span class="text">Dashboard</span></a>
+
+                            <div class="menu-item">
+                                <a href="#" onclick="handleMenuClick('cadastrosSub')">
+                                    <span class="icon">engineering</span>
+                                    <span class="text">Cadastros</span>
+                                    <span class="icon expand-icon" style="margin-left:auto;">expand_more</span>
+                                </a>
+                                <div class="submenu" id="cadastrosSub" style="display:none;">
+                                    <a href="#" onclick="loadPage('Obras')"><span class="icon">format_list_bulleted</span><span class="text">Obras</span></a>
+                                    
+                                    <a href="#" onclick="loadPage('Usuários')"><span class="icon">person</span><span class="text">Usuários</span></a>
+                                    
+                                    <a href="#" onclick="loadPage('Departamentos')"><span class="icon">groups</span><span class="text">Departamentos</span></a>
+                                </div>
+                            </div>
+                            
+                            <a href="#" onclick="loadPage('Relatórios')"><span class="icon">bar_chart</span><span class="text">Relatórios</span></a>
+                        </div>
+
+                        <div class="logout-area">
+                            <a href="#" onclick="handleLogout()">
+                            <span class="icon">logout</span><span class="text">Sair</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="content-wrapper">
+                        <div class="topbar" id="topbar-title">Menu Principal</div>
+                        <div class="content" id="page-content">
+                        </div>
+                        <div class="footer">
+                            <span>SIGMA - Sistema Inteligente de Gestão &copy; 2025</span>
+                            <span id="nivel-usuario">Perfil: ${perfil.nivel_usu || 'Padrão'} | Sessão ID: ${sessaoIdCurto}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            loadPage('Dashboard');
+        }
+
+        // --- LÓGICA DE INICIALIZAÇÃO E CHECAGEM DE URL ---
+
+        async function checkURLForPasswordReset() {
+            const hash = window.location.hash;
+            const urlParams = new URLSearchParams(hash.substring(1));
+            const type = urlParams.get('type');
+            const accessToken = urlParams.get('access_token');
+            
+            if (type === 'recovery' && accessToken) {
+                blockScreen();
+                
+                // 1. Tenta usar o token para obter a sessão
+                const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+                
+                if (sessionError || !session) {
+                    unblockScreen();
+                    // Limpa o URL e vai para o login com erro
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    Swal.fire('Erro de Token', 'O link de recuperação expirou ou é inválido.', 'error');
+                    renderLogin();
+                    return true; 
+                }
+                
+                // 2. EXTRAI O EMAIL DO OBJETO DE SESSÃO DO SUPABASE
+                const userEmail = session.user.email;
+
+                unblockScreen();
+                
+                // 3. Mostra o formulário de mudança de senha com o e-mail preenchido e desabilitado
+                renderChangePasswordForm("Defina uma nova senha.", userEmail);
+                return true; 
+            }
+            return false; 
+        }
+
+        async function initApp() {
+            blockScreen();
+            
+            // 1. Prioridade: Redefinição de Senha
+            const isResetFlow = await checkURLForPasswordReset();
+            if (isResetFlow) {
+                unblockScreen();
+                return;
+            }
+
+            // 2. Segunda Prioridade: Sessão Ativa
+            // Usa o sessionStorage (limpa ao fechar o navegador)
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            
+            if (session) {
+                const userId = session.user.id;
+                const { data: perfil, error: perfilError } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .select(`id, nome_usu, nivel_usu, sessao_atual`)
+                    .eq('id', userId)
+                    .single();
+
+                if (perfil && !perfilError) {
+                    perfilUsuario = perfil;
+                    renderMainPage(perfilUsuario);
+                    unblockScreen();
+                    return;
+                } else {
+                    // Se o perfil falhar, faz logout e vai para o login
+                    await supabaseClient.auth.signOut();
+                }
+            } else {
+                // Sem sessão encontrada, garante o logout (limpeza de token antigo do localStorage)
+                await supabaseClient.auth.signOut();
+            }
+            
+            // 3. Padrão: Tela de Login
+            renderLogin();
+            unblockScreen();
+        }
+
+        // INICIA O APLICATIVO
+        initApp();
+    </script>
 </body>
 </html>
